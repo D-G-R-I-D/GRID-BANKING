@@ -42,12 +42,12 @@ jobs:
       - id: check
         run: |
           if [ -f package.json ]; then echo "has_app=true" >> "$GITHUB_OUTPUT"; else echo "has_app=false" >> "$GITHUB_OUTPUT"; fi
-      - uses: github/codeql-action/init@v3
+      - uses: github/codeql-action/init@v4
         if: steps.check.outputs.has_app == 'true'
         with:
           languages: javascript-typescript
           queries: security-and-quality
-      - uses: github/codeql-action/analyze@v3
+      - uses: github/codeql-action/analyze@v4
         if: steps.check.outputs.has_app == 'true'
 
   semgrep:
