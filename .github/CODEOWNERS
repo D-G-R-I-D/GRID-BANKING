@@ -1,18 +1,5 @@
-# Code owners — every PR requires review from an owner listed here.
-#
-# ⚠️ Replace @GRID-OWNER below with your actual GitHub username (or an org
-#    team like @D-G-R-I-D/maintainers). An unknown name here silently
-#    disables code-owner review enforcement.
+# Code owners — every PR into a protected branch needs @D-G-R-I-D's review.
+# This is what makes "only the owner can approve" real: a plain
+# "1 approval" rule could be satisfied by two teammates approving each other.
 
-# Default owner for everything in the repo
-*                       @GRID-OWNER
-
-# Security-sensitive areas — keep ownership tight even if the team grows
-/.github/                @GRID-OWNER
-/scripts/                @GRID-OWNER
-/app/api/                @GRID-OWNER
-/lib/auth/               @GRID-OWNER
-/lib/security/           @GRID-OWNER
-/middleware.ts           @GRID-OWNER
-/openapi/                @GRID-OWNER
-/docs/threat-model.md    @GRID-OWNER
+*   @D-G-R-I-D
