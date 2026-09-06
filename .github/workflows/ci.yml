@@ -14,9 +14,6 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  # npm install (not ci) until a package-lock.json is committed. Once the
-  # lockfile lands, switch these to `npm ci`.
-  INSTALL: npm install --no-audit --no-fund
   # prisma generate (postinstall) reads this; it doesn't connect at install time.
   DATABASE_URL: postgresql://grid:grid@localhost:5432/grid
 
@@ -28,8 +25,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: npm
-      - run: $INSTALL
+      - run: npm install --no-audit --no-fund
       - run: npm run format:check
       - run: npm run lint
       - run: npm run typecheck
@@ -42,8 +38,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: npm
-      - run: $INSTALL
+      - run: npm install --no-audit --no-fund
       - run: npm run build
         env:
           SESSION_SECRET: build-time-placeholder-value-at-least-32-chars-long
@@ -70,8 +65,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: npm
-      - run: $INSTALL
+      - run: npm install --no-audit --no-fund
       - run: npx prisma db push --skip-generate
       - run: npx prisma generate
       - run: npx playwright install --with-deps chromium
