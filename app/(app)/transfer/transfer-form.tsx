@@ -24,7 +24,11 @@ export function TransferForm({ accounts }: { accounts: AccountOption[] }) {
 
   return (
     <form action={action} className="flex flex-col gap-4">
-      <input type="hidden" name="idempotencyKey" defaultValue={idempotencyKey} />
+      <input
+        type="hidden"
+        name="idempotencyKey"
+        defaultValue={idempotencyKey}
+      />
 
       <label className="flex flex-col gap-1.5 text-sm font-medium">
         From

@@ -3,8 +3,7 @@ import { Prisma } from "@prisma/client";
 import { db } from "./db";
 
 export type TransferResult =
-  | { ok: true; transferId: string }
-  | { ok: false; error: string };
+  { ok: true; transferId: string } | { ok: false; error: string };
 
 interface CreateTransferArgs {
   userId: string;

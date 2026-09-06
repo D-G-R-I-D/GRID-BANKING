@@ -9,7 +9,13 @@ interface FieldProps extends Omit<ComponentProps<"input">, "id"> {
   error?: string;
 }
 
-export function Field({ label, hint, error, className = "", ...props }: FieldProps) {
+export function Field({
+  label,
+  hint,
+  error,
+  className = "",
+  ...props
+}: FieldProps) {
   const id = useId();
   const describedBy = [hint ? `${id}-hint` : null, error ? `${id}-error` : null]
     .filter(Boolean)

@@ -1,6 +1,8 @@
 import { test, expect } from "@playwright/test";
 
-test("a new person can sign up and land on their dashboard", async ({ page }) => {
+test("a new person can sign up and land on their dashboard", async ({
+  page,
+}) => {
   const email = `test-${Date.now()}@grid.bank`;
 
   await page.goto("/sign-up");

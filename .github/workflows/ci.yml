@@ -26,11 +26,10 @@ jobs:
         with:
           node-version: 20
       - run: npm install --no-audit --no-fund
+      - run: npm run format:check
       - run: npm run lint
       - run: npm run typecheck
       - run: npm run test:ci
-      - name: format check (temporarily shows the diff on failure)
-        run: npm run format:check || (npx prettier --write . && git --no-pager diff)
 
   build:
     runs-on: ubuntu-latest

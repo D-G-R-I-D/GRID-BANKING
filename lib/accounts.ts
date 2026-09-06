@@ -31,7 +31,9 @@ export async function getRecentActivity(userId: string, take = 10) {
   const byId = new Map(accounts.map((a) => [a.id, a.name]));
 
   const transfers = await db.transfer.findMany({
-    where: { OR: [{ fromAccountId: { in: ids } }, { toAccountId: { in: ids } }] },
+    where: {
+      OR: [{ fromAccountId: { in: ids } }, { toAccountId: { in: ids } }],
+    },
     orderBy: { createdAt: "desc" },
     take,
   });

@@ -10,7 +10,9 @@ export function formatMoney(
   currency = DEFAULT_CURRENCY,
 ): string {
   if (!Number.isInteger(minorUnits)) {
-    throw new Error(`formatMoney expects integer minor units, got ${minorUnits}`);
+    throw new Error(
+      `formatMoney expects integer minor units, got ${minorUnits}`,
+    );
   }
   return new Intl.NumberFormat("en-NG", {
     style: "currency",

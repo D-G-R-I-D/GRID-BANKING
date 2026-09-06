@@ -18,4 +18,6 @@ jobs:
         with:
           node-version: 20
       - run: npm install --package-lock-only --ignore-scripts --no-audit --no-fund
-      - run: npm audit --audit-level=high
+      # Only production dependencies matter for the deployed app. Dev-tool
+      # advisories (prisma CLI, vitest/esbuild) are tracked by Dependabot.
+      - run: npm audit --omit=dev --audit-level=high
