@@ -1,0 +1,92 @@
+@import "tailwindcss";
+
+/*
+  GRID design tokens — mature, minimal, near-monochrome.
+  Warm paper / near-black ink / one quiet green accent.
+*/
+:root {
+  --paper: #faf9f7;
+  --surface: #ffffff;
+  --ink: #0b0b0c;
+  --ink-soft: #52504b;
+  --ink-faint: #8b887f;
+  --line: #e7e4dd;
+  --accent: #1e3a2f;
+  --accent-ink: #faf9f7;
+  --positive: #2f6b4f;
+  --critical: #8a2f2f;
+  --focus: #1e3a2f;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #0c0c0d;
+    --surface: #141414;
+    --ink: #f2f1ec;
+    --ink-soft: #b4b1a8;
+    --ink-faint: #7d7a72;
+    --line: #262523;
+    --accent: #7fb79b;
+    --accent-ink: #0c0c0d;
+    --positive: #7fb79b;
+    --critical: #d98a8a;
+    --focus: #7fb79b;
+  }
+}
+
+@theme inline {
+  --color-paper: var(--paper);
+  --color-surface: var(--surface);
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-ink-faint: var(--ink-faint);
+  --color-line: var(--line);
+  --color-accent: var(--accent);
+  --color-accent-ink: var(--accent-ink);
+  --color-positive: var(--positive);
+  --color-critical: var(--critical);
+
+  --font-sans: var(--font-sans-stack);
+  --font-serif: var(--font-serif-stack);
+  --font-mono: var(--font-mono-stack);
+}
+
+* {
+  border-color: var(--line);
+}
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-sans-stack);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-serif-stack);
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+
+/* Money and account numbers: tabular figures. */
+.tnum {
+  font-family: var(--font-mono-stack);
+  font-variant-numeric: tabular-nums;
+}
+
+:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

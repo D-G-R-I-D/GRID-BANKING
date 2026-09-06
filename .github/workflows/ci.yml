@@ -2,120 +2,81 @@ name: CI
 
 on:
   pull_request:
-    branches: [dev, staging, main]
+    branches: [dev, main]
   push:
-    branches: [dev, staging, main]
+    branches: [dev, main]
 
-# Least-privilege by default. Jobs opt into more if they need it.
 permissions:
   contents: read
 
-# A newer push to the same ref cancels the in-flight run.
 concurrency:
-  group: ci-${{ github.workflow }}-${{ github.ref }}
+  group: ci-${{ github.ref }}
   cancel-in-progress: true
 
 env:
-  NODE_VERSION: "20"
+  # npm install (not ci) until a package-lock.json is committed. Once the
+  # lockfile lands, switch these to `npm ci`.
+  INSTALL: npm install --no-audit --no-fund
+  # prisma generate (postinstall) reads this; it doesn't connect at install time.
+  DATABASE_URL: postgresql://grid:grid@localhost:5432/grid
 
 jobs:
-  # Detects whether the app has been scaffolded yet (package.json present).
-  # Before milestone M0 lands, the real jobs skip cleanly instead of failing red.
-  setup:
-    runs-on: ubuntu-latest
-    outputs:
-      has_app: ${{ steps.check.outputs.has_app }}
-    steps:
-      - uses: actions/checkout@v4
-      - id: check
-        run: |
-          if [ -f package.json ]; then
-            echo "has_app=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "has_app=false" >> "$GITHUB_OUTPUT"
-            echo "::notice::No package.json yet — CI jobs will skip until the M0 scaffold is merged."
-          fi
-
-  lint:
-    needs: setup
-    if: needs.setup.outputs.has_app == 'true'
+  quality:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: ${{ env.NODE_VERSION }}
+          node-version: 20
           cache: npm
-      - run: npm ci
-      - run: npm run lint
+      - run: $INSTALL
       - run: npm run format:check
-
-  typecheck:
-    needs: setup
-    if: needs.setup.outputs.has_app == 'true'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: npm
-      - run: npm ci
+      - run: npm run lint
       - run: npm run typecheck
-
-  test:
-    needs: setup
-    if: needs.setup.outputs.has_app == 'true'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: npm
-      - run: npm ci
       - run: npm run test:ci
-      - name: Upload coverage
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: coverage
-          path: coverage/
-          if-no-files-found: ignore
-          retention-days: 7
 
   build:
-    needs: setup
-    if: needs.setup.outputs.has_app == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: ${{ env.NODE_VERSION }}
+          node-version: 20
           cache: npm
-      - run: npm ci
+      - run: $INSTALL
       - run: npm run build
         env:
-          # Build must succeed with no real secrets present.
-          NEXT_TELEMETRY_DISABLED: "1"
+          SESSION_SECRET: build-time-placeholder-value-at-least-32-chars-long
 
-  # Runs once the E2E suite exists (milestone M2). Skips cleanly until then.
   e2e:
-    needs: setup
-    if: needs.setup.outputs.has_app == 'true' && hashFiles('playwright.config.*') != ''
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: grid
+          POSTGRES_PASSWORD: grid
+          POSTGRES_DB: grid
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U grid"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      DATABASE_URL: postgresql://grid:grid@localhost:5432/grid
+      SESSION_SECRET: e2e-session-secret-at-least-32-characters-long
+      NEXT_PUBLIC_APP_URL: http://localhost:3100
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: ${{ env.NODE_VERSION }}
+          node-version: 20
           cache: npm
-      - run: npm ci
-      - run: npx playwright install --with-deps
+      - run: $INSTALL
+      - run: npx prisma db push --skip-generate
+      - run: npx prisma generate
+      - run: npx playwright install --with-deps chromium
       - run: npm run test:e2e
-      - name: Upload Playwright report
-        if: always()
+      - if: always()
         uses: actions/upload-artifact@v4
         with:
           name: playwright-report
@@ -123,20 +84,15 @@ jobs:
           if-no-files-found: ignore
           retention-days: 7
 
-  # Aggregate gate — this is the single check to mark "required" in branch protection.
+  # The single check to mark "required" in branch protection.
   ci-ok:
     if: always()
-    needs: [lint, typecheck, test, build, e2e]
+    needs: [quality, build, e2e]
     runs-on: ubuntu-latest
     steps:
-      - name: Verify no required job failed
-        run: |
-          results='${{ join(needs.*.result, ",") }}'
-          echo "Upstream results: $results"
-          case "$results" in
-            *failure*|*cancelled*)
-              echo "::error::A required CI job failed or was cancelled."
-              exit 1 ;;
-            *)
-              echo "All required CI jobs passed or were skipped." ;;
-          esac
+      - run: |
+          echo "quality=${{ needs.quality.result }} build=${{ needs.build.result }} e2e=${{ needs.e2e.result }}"
+          [ "${{ needs.quality.result }}" = "success" ] \
+            && [ "${{ needs.build.result }}" = "success" ] \
+            && [ "${{ needs.e2e.result }}" = "success" ] \
+            || { echo "::error::a required CI job failed"; exit 1; }
