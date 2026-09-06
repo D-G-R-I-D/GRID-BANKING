@@ -1,0 +1,26 @@
+name: Feature / task
+description: A unit of work to build
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: goal
+    attributes:
+      label: Goal
+      description: What outcome do we want and for whom (the user story).
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      value: |
+        - [ ]
+        - [ ] All four states: loading / empty / error / success
+        - [ ] Accessible (keyboard + axe clean), light + dark
+    validations:
+      required: true
+  - type: textarea
+    id: abuse
+    attributes:
+      label: Abuse cases / security notes
+      description: How could this be misused? Auth, limits, PII, third-party calls?
