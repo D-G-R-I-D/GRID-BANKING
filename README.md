@@ -20,20 +20,19 @@ Postgres via Prisma, one repo for frontend and API.
 ## Run it locally
 
 ```bash
-# 1. Start Postgres
-docker compose up -d
-
-# 2. Install + set up env
 npm install
-cp .env.example .env          # the defaults match docker-compose
-
-# 3. Create the schema and seed a demo user
+cp .env.example .env
+# set DATABASE_URL in .env — pick ONE of:
+#   • Docker:  docker compose up -d   (uses the .env.example default)
+#   • Neon:    free Postgres at neon.tech, paste its connection string
 npx prisma db push
 npm run db:seed                # demo@grid.bank / demo-password-123
-
-# 4. Go
 npm run dev                    # http://localhost:3000
 ```
+
+No Docker? Create a free project at [neon.tech](https://neon.tech), copy the
+connection string into `DATABASE_URL`, and skip `docker compose`. The same
+string works for the Vercel deploy later.
 
 ## Scripts
 
