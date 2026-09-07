@@ -30,3 +30,10 @@ test("protected routes redirect anonymous visitors", async ({ page }) => {
   await page.goto("/dashboard");
   await expect(page).toHaveURL(/\/sign-in$/);
 });
+
+test("shows a notice after an inactivity sign-out", async ({ page }) => {
+  await page.goto("/sign-in?reason=timeout");
+  await expect(
+    page.getByText(/signed out after a period of inactivity/i),
+  ).toBeVisible();
+});
