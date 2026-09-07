@@ -33,3 +33,27 @@ export type TransferWithParties = Awaited<
 export function findTransferByIdempotencyKey(idempotencyKey: string) {
   return db.transfer.findUnique({ where: { idempotencyKey } });
 }
+
+export function findTransferWithPartiesById(id: string) {
+  return db.transfer.findUnique({
+    where: { id },
+    include: {
+      fromAccount: {
+        select: {
+          id: true,
+          name: true,
+          userId: true,
+          user: { select: { name: true, accountNumber: true } },
+        },
+      },
+      toAccount: {
+        select: {
+          id: true,
+          name: true,
+          userId: true,
+          user: { select: { name: true, accountNumber: true } },
+        },
+      },
+    },
+  });
+}

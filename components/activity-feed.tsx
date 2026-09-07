@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { ArrowDownLeft, ArrowUpRight } from "@/components/icons";
 import { MoneyAmount } from "@/components/money-amount";
 import type { ActivityView } from "@/lib/view";
@@ -38,29 +39,34 @@ export function ActivityFeed({ items }: { items: ActivityView[] }) {
               return (
                 <li
                   key={item.id}
-                  className="flex items-center gap-3 border-b border-line px-4 py-3 last:border-b-0"
+                  className="border-b border-line last:border-b-0"
                 >
-                  <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-surface-sunk text-ink-soft">
-                    <Icon size={15} />
-                  </span>
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm text-ink">
-                      {item.counterparty}
-                    </p>
-                    <p className="truncate text-xs text-ink-faint">
-                      {item.note ?? (incoming ? "Received" : "Sent")} ·{" "}
-                      {item.at.toLocaleTimeString("en-NG", {
-                        hour: "numeric",
-                        minute: "2-digit",
-                      })}
-                    </p>
-                  </div>
-                  <MoneyAmount
-                    minorUnits={item.amountMinor}
-                    currency={item.currency}
-                    signed
-                    className="text-sm"
-                  />
+                  <Link
+                    href={`/transfer/receipt/${item.id}`}
+                    className="flex items-center gap-3 px-4 py-3 transition-colors hover:bg-surface-sunk"
+                  >
+                    <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-surface-sunk text-ink-soft">
+                      <Icon size={15} />
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm text-ink">
+                        {item.counterparty}
+                      </p>
+                      <p className="truncate text-xs text-ink-faint">
+                        {item.note ?? (incoming ? "Received" : "Sent")} ·{" "}
+                        {item.at.toLocaleTimeString("en-NG", {
+                          hour: "numeric",
+                          minute: "2-digit",
+                        })}
+                      </p>
+                    </div>
+                    <MoneyAmount
+                      minorUnits={item.amountMinor}
+                      currency={item.currency}
+                      signed
+                      className="text-sm"
+                    />
+                  </Link>
                 </li>
               );
             })}

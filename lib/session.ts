@@ -1,13 +1,14 @@
 import "server-only";
-import { getIronSession, type SessionOptions } from "iron-session";
+import { getIronSession } from "iron-session";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { cache } from "react";
 import { findUserById } from "@/lib/data/users";
+import { checkExpiry, stepUpIsValid } from "@/lib/session-policy";
+import { sessionOptions, type SessionData } from "@/lib/session-config";
 
-export interface SessionData {
-  userId?: string;
-}
+export type { SessionData } from "@/lib/session-config";
+export { sessionOptions } from "@/lib/session-config";
 
 export interface CurrentUser {
   id: string;
@@ -17,23 +18,6 @@ export interface CurrentUser {
   accountNumber: string;
 }
 
-function sessionOptions(): SessionOptions {
-  const password = process.env.SESSION_SECRET;
-  if (!password || password.length < 32) {
-    throw new Error("SESSION_SECRET must be set and at least 32 characters");
-  }
-  return {
-    password,
-    cookieName: "grid_session",
-    cookieOptions: {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      path: "/",
-    },
-  };
-}
-
 export async function getSession() {
   const cookieStore = await cookies();
   return getIronSession<SessionData>(cookieStore, sessionOptions());
@@ -41,7 +25,10 @@ export async function getSession() {
 
 export async function startSession(userId: string) {
   const session = await getSession();
+  const now = Date.now();
   session.userId = userId;
+  session.createdAt = now;
+  session.lastSeenAt = now;
   await session.save();
 }
 
@@ -50,10 +37,29 @@ export async function endSession() {
   session.destroy();
 }
 
-/** Current user (safe fields only) or null. Cached per request. */
+/** Record that the user just re-entered their password. */
+export async function grantStepUp() {
+  const session = await getSession();
+  session.stepUpAt = Date.now();
+  await session.save();
+}
+
+/** True if a recent password confirmation is still trusted. */
+export async function hasStepUp(): Promise<boolean> {
+  const session = await getSession();
+  return stepUpIsValid(session.stepUpAt);
+}
+
+/**
+ * Current user (safe fields only) or null. Cached per request.
+ * Enforces the session timers read-only — the proxy does the cookie
+ * cleanup, this just refuses to authorise a stale session.
+ */
 export const getCurrentUser = cache(async (): Promise<CurrentUser | null> => {
   const session = await getSession();
   if (!session.userId) return null;
+  if (checkExpiry(session)) return null;
+
   const user = await findUserById(session.userId);
   if (!user) return null;
   return {

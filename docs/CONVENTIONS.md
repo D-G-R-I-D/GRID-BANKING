@@ -47,11 +47,14 @@ lib/
   services/                business logic — returns view models
     auth-service.ts  dashboard-service.ts  transfer-service.ts
     activity-service.ts  profile-service.ts  mappers.ts
-  view.ts                  view-model types (AccountView, ActivityView, …)
-  session.ts               iron-session: getSession, getCurrentUser, requireUser
+  view.ts                  view-model types (AccountView, ActivityView, ReceiptView, …)
+  session.ts               iron-session: getSession, getCurrentUser, requireUser,
+                           grantStepUp / hasStepUp
+  session-config.ts        cookie options + SessionData — Prisma-free (edge proxy imports it)
+  session-policy.ts        pure: checkExpiry (idle/absolute), stepUpIsValid — unit tested
   validation.ts            Zod schemas
   auth.ts                  password hash/verify
-  money.ts  phone.ts       pure helpers (unit tested)
+  money.ts  phone.ts  reference.ts   pure helpers (unit tested)
   name.ts  cn.ts  form.ts
 components/
   ui/                      primitives: Button, Field, Card
@@ -75,6 +78,9 @@ proxy.ts                   Next 16 edge convention (was middleware.ts) — anon 
 5. **Components never touch Prisma.** Services map rows → `lib/view.ts` shapes.
 6. Gating: `(app)/layout.tsx` calls `requireUser()`. In an action use
    `getCurrentUser()` and return an error (don't redirect from an action).
+6a. **Sensitive actions** (moving money, security settings) go through the
+   step-up gate: `hasStepUp()` → else require the password, `verifyUserPassword`,
+   `grantStepUp()`. Trusted for `STEP_UP_MINUTES` (default 5).
 7. No `any`, no `dangerouslySetInnerHTML` (ESLint errors).
 8. Styling: token classes only (`bg-surface`, `text-ink-soft`, `border-line`,
    `text-accent`, `bg-card`…). Tokens in `app/globals.css`. No raw hex.
