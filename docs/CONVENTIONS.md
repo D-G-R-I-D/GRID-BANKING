@@ -29,7 +29,7 @@ lib/
 prisma/
   schema.prisma         data model
   seed.ts               demo user
-middleware.ts           coarse redirect for anon users hitting /dashboard
+proxy.ts                coarse redirect for anon users hitting /dashboard
 ```
 
 ## Rules
