@@ -25,7 +25,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-      - run: npm install --no-audit --no-fund
+          cache: npm
+      - run: npm ci
       - run: npm run format:check
       - run: npm run lint
       - run: npm run typecheck
@@ -38,7 +39,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-      - run: npm install --no-audit --no-fund
+          cache: npm
+      - run: npm ci
       - run: npm run build
         env:
           SESSION_SECRET: build-time-placeholder-value-at-least-32-chars-long
@@ -65,9 +67,9 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-      - run: npm install --no-audit --no-fund
-      - run: npx prisma db push --skip-generate
-      - run: npx prisma generate
+          cache: npm
+      - run: npm ci
+      - run: npx prisma migrate deploy
       - run: npx playwright install --with-deps chromium
       - run: npm run test:e2e
       - if: always()

@@ -17,7 +17,6 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-      - run: npm install --package-lock-only --ignore-scripts --no-audit --no-fund
       # Reports every advisory but doesn't block: the current highs are in
       # dev-only tooling (prisma CLI -> deepmerge-ts) with no production impact.
       # Dependabot bumps them when upstream patches. Tighten to blocking once

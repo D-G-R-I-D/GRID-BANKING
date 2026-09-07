@@ -7,8 +7,9 @@ services:
       POSTGRES_USER: grid
       POSTGRES_PASSWORD: grid
       POSTGRES_DB: grid
+    # Host port 5433 to avoid clashing with a natively-installed Postgres on 5432.
     ports:
-      - "5432:5432"
+      - "5433:5432"
     volumes:
       - grid_pgdata:/var/lib/postgresql/data
     healthcheck:
