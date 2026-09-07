@@ -37,8 +37,8 @@ test("an internal transfer needs a password and produces a receipt", async ({
   await page.getByRole("button", { name: /Move ₦50/ }).click();
 
   await expect(page).toHaveURL(/\/transfer\/receipt\//);
-  await expect(page.getByText("Reference")).toBeVisible();
-  await expect(page.getByText("Successful")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Receipt" })).toBeVisible();
+  await expect(page.getByText(/GRD-[0-9A-Z]{4}-[0-9A-Z]{4}/)).toBeVisible();
 });
 
 test("protected routes redirect anonymous visitors", async ({ page }) => {
