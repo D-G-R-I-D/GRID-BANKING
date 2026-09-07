@@ -115,6 +115,11 @@
 
 html {
   color-scheme: light dark;
+  /* Kill pinch-zoom / double-tap-zoom — iOS Safari ignores user-scalable=no,
+     but it respects touch-action. This is an app, not a document. */
+  touch-action: pan-x pan-y;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
 body {
@@ -123,6 +128,7 @@ body {
   font-family: var(--font-sans-stack);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+  overscroll-behavior-y: none;
 }
 
 h1,
