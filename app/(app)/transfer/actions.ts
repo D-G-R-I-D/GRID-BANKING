@@ -2,9 +2,8 @@
 
 import { revalidatePath } from "next/cache";
 import { getCurrentUser } from "@/lib/session";
+import { submitTransfer } from "@/lib/services/transfer-service";
 import { transferSchema } from "@/lib/validation";
-import { parseAmountToMinor } from "@/lib/money";
-import { createTransfer } from "@/lib/transfers";
 import { firstFieldErrors } from "@/lib/form";
 
 export interface TransferState {
@@ -25,26 +24,11 @@ export async function transferAction(
     return { fieldErrors: firstFieldErrors(parsed.error) };
   }
 
-  const { fromAccountId, toAccountId, amount, note, idempotencyKey } =
-    parsed.data;
-
-  const amountMinor = parseAmountToMinor(amount);
-  if (amountMinor === null) {
-    return { fieldErrors: { amount: "Enter a valid amount, e.g. 25.00" } };
-  }
-
-  const result = await createTransfer({
-    userId: user.id,
-    fromAccountId,
-    toAccountId,
-    amountMinor,
-    note,
-    idempotencyKey,
-  });
-
+  const result = await submitTransfer(user.id, parsed.data);
   if (!result.ok) return { error: result.error };
 
   revalidatePath("/dashboard");
   revalidatePath("/transfer");
+  revalidatePath("/activity");
   return { success: "Transfer complete." };
 }

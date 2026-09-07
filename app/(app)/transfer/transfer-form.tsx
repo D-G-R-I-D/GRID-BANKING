@@ -1,72 +1,70 @@
 "use client";
 
-import { useActionState, useMemo } from "react";
+import { useActionState, useMemo, useState } from "react";
+import { ArrowDown } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { Field } from "@/components/ui/field";
 import { formatMoney } from "@/lib/money";
+import { cn } from "@/lib/cn";
+import type { AccountView } from "@/lib/view";
 import { transferAction, type TransferState } from "./actions";
-
-interface AccountOption {
-  id: string;
-  name: string;
-  balanceMinor: number;
-  currency: string;
-}
 
 const initial: TransferState = {};
 
-export function TransferForm({ accounts }: { accounts: AccountOption[] }) {
+export function TransferForm({ accounts }: { accounts: AccountView[] }) {
   const [state, action, pending] = useActionState(transferAction, initial);
-
-  // A fresh key per mount so a resubmit after success is a new transfer,
-  // but a double-click within one submit is de-duplicated server-side.
   const idempotencyKey = useMemo(() => crypto.randomUUID(), []);
+
+  const [fromId, setFromId] = useState(accounts[0]?.id ?? "");
+  const from = accounts.find((a) => a.id === fromId) ?? accounts[0];
+  const to = accounts.find((a) => a.id !== fromId) ?? accounts[1];
 
   return (
     <form action={action} className="flex flex-col gap-4">
-      <input
-        type="hidden"
-        name="idempotencyKey"
-        defaultValue={idempotencyKey}
-      />
+      <input type="hidden" name="idempotencyKey" defaultValue={idempotencyKey} />
+      <input type="hidden" name="toAccountId" value={to?.id ?? ""} readOnly />
+      <input type="hidden" name="fromAccountId" value={fromId} readOnly />
 
-      <label className="flex flex-col gap-1.5 text-sm font-medium">
-        From
-        <select
-          name="fromAccountId"
-          required
-          className="h-10 rounded-md border border-line bg-surface px-3 text-sm"
-          defaultValue={accounts[0]?.id}
-        >
+      <div className="flex flex-col gap-2">
+        <p className="text-sm font-medium text-ink">From</p>
+        <div className="grid grid-cols-2 gap-2">
           {accounts.map((a) => (
-            <option key={a.id} value={a.id}>
-              {a.name} — {formatMoney(a.balanceMinor, a.currency)}
-            </option>
+            <button
+              key={a.id}
+              type="button"
+              onClick={() => setFromId(a.id)}
+              aria-pressed={a.id === fromId}
+              className={cn(
+                "rounded-md border p-3 text-left transition-colors",
+                a.id === fromId
+                  ? "border-accent bg-surface-sunk"
+                  : "border-line bg-surface hover:bg-surface-sunk",
+              )}
+            >
+              <span className="block text-sm text-ink">{a.name}</span>
+              <span className="tnum block text-xs text-ink-faint">
+                {formatMoney(a.balanceMinor, a.currency)}
+              </span>
+            </button>
           ))}
-        </select>
-      </label>
+        </div>
+      </div>
 
-      <label className="flex flex-col gap-1.5 text-sm font-medium">
-        To
-        <select
-          name="toAccountId"
-          required
-          className="h-10 rounded-md border border-line bg-surface px-3 text-sm"
-          defaultValue={accounts[1]?.id}
-        >
-          {accounts.map((a) => (
-            <option key={a.id} value={a.id}>
-              {a.name}
-            </option>
-          ))}
-        </select>
-      </label>
+      <div className="flex items-center justify-center py-1 text-ink-faint">
+        <ArrowDown size={16} />
+      </div>
+
+      <div className="rounded-md border border-line bg-surface p-3">
+        <p className="text-sm text-ink">To {to?.name}</p>
+        <p className="text-xs text-ink-faint">Your other account</p>
+      </div>
 
       <Field
         label="Amount"
         name="amount"
         inputMode="decimal"
         placeholder="0.00"
+        prefix="₦"
         required
         error={state.fieldErrors?.amount}
       />
@@ -88,8 +86,8 @@ export function TransferForm({ accounts }: { accounts: AccountOption[] }) {
         </p>
       )}
 
-      <Button type="submit" disabled={pending} className="mt-2">
-        {pending ? "Sending…" : "Send transfer"}
+      <Button type="submit" size="lg" disabled={pending}>
+        {pending ? "Sending…" : `Send from ${from?.name ?? "account"}`}
       </Button>
     </form>
   );

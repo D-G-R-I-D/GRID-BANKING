@@ -1,8 +1,13 @@
 import { z } from "zod";
+import { normalizePhone } from "./phone";
 
 export const signUpSchema = z.object({
   name: z.string().trim().min(1, "Enter your name").max(80),
   email: z.string().trim().toLowerCase().email("Enter a valid email"),
+  phone: z
+    .string()
+    .trim()
+    .refine((v) => normalizePhone(v) !== null, "Enter a valid Nigerian number"),
   password: z
     .string()
     .min(10, "Use at least 10 characters")

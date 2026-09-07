@@ -1,9 +1,13 @@
 import type { ComponentProps } from "react";
+import { cn } from "@/lib/cn";
 
-export function Card({ className = "", ...props }: ComponentProps<"div">) {
+export function Card({ className, ...props }: ComponentProps<"div">) {
   return (
     <div
-      className={`rounded-lg border border-line bg-surface p-5 ${className}`}
+      className={cn(
+        "rounded-lg border border-line bg-surface p-4 shadow-[var(--shadow-sm)]",
+        className,
+      )}
       {...props}
     />
   );

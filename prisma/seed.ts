@@ -5,6 +5,7 @@ const db = new PrismaClient();
 
 async function main() {
   const email = "demo@grid.bank";
+  const phone = "+2348012345678";
   const passwordHash = await bcrypt.hash("demo-password-123", 12);
 
   await db.user.deleteMany({ where: { email } });
@@ -12,6 +13,8 @@ async function main() {
   const user = await db.user.create({
     data: {
       email,
+      phone,
+      accountNumber: phone.slice(-10),
       name: "Demo Person",
       passwordHash,
       accounts: {
@@ -24,12 +27,12 @@ async function main() {
     include: { accounts: true },
   });
 
-  const [everyday, savings] = user.accounts;
-  if (everyday && savings) {
+  const [flow, vault] = user.accounts;
+  if (flow && vault) {
     await db.transfer.create({
       data: {
-        fromAccountId: everyday.id,
-        toAccountId: savings.id,
+        fromAccountId: flow.id,
+        toAccountId: vault.id,
         amountMinor: 20_000_00,
         currency: "NGN",
         note: "Monthly save",

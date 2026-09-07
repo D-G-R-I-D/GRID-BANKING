@@ -2,41 +2,66 @@
 
 /*
   GRID design tokens — mature, minimal, near-monochrome.
-  Warm paper / near-black ink / one quiet green accent.
+  Warm paper, near-black ink, one quiet green accent, and a single
+  always-dark "money card" surface for contrast.
 */
 :root {
-  --paper: #faf9f7;
+  --paper: #f6f4f0;
   --surface: #ffffff;
+  --surface-sunk: #efece6;
   --ink: #0b0b0c;
-  --ink-soft: #52504b;
+  --ink-soft: #55524c;
   --ink-faint: #8b887f;
-  --line: #e7e4dd;
-  --accent: #1e3a2f;
-  --accent-ink: #faf9f7;
-  --positive: #2f6b4f;
-  --critical: #8a2f2f;
-  --focus: #1e3a2f;
+  --line: #e5e1d8;
+
+  --accent: #1f3d2f;
+  --accent-ink: #f6f4f0;
+  --positive: #1f6b4a;
+  --critical: #9b2c2c;
+  --focus: #1f3d2f;
+
+  /* The hero card is dark in every theme. */
+  --card: #12130f;
+  --card-ink: #f2f1ea;
+  --card-ink-soft: #9c9f92;
+  --card-line: #2a2c24;
+
+  --r-sm: 0.5rem;
+  --r-md: 0.875rem;
+  --r-lg: 1.25rem;
+  --shadow-sm: 0 1px 2px rgb(16 16 12 / 0.04);
+  --shadow-md: 0 6px 24px -12px rgb(16 16 12 / 0.18);
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --paper: #0c0c0d;
-    --surface: #141414;
-    --ink: #f2f1ec;
-    --ink-soft: #b4b1a8;
-    --ink-faint: #7d7a72;
-    --line: #262523;
-    --accent: #7fb79b;
-    --accent-ink: #0c0c0d;
-    --positive: #7fb79b;
-    --critical: #d98a8a;
-    --focus: #7fb79b;
+    --paper: #0b0b0c;
+    --surface: #141513;
+    --surface-sunk: #101110;
+    --ink: #f2f1ea;
+    --ink-soft: #b3b0a6;
+    --ink-faint: #7c7a72;
+    --line: #262622;
+
+    --accent: #86bfa3;
+    --accent-ink: #0b0b0c;
+    --positive: #86bfa3;
+    --critical: #dd9a9a;
+    --focus: #86bfa3;
+
+    --card: #1b1c16;
+    --card-ink: #f2f1ea;
+    --card-ink-soft: #9c9f92;
+    --card-line: #33352c;
+
+    --shadow-md: 0 6px 24px -12px rgb(0 0 0 / 0.5);
   }
 }
 
 @theme inline {
   --color-paper: var(--paper);
   --color-surface: var(--surface);
+  --color-surface-sunk: var(--surface-sunk);
   --color-ink: var(--ink);
   --color-ink-soft: var(--ink-soft);
   --color-ink-faint: var(--ink-faint);
@@ -45,6 +70,14 @@
   --color-accent-ink: var(--accent-ink);
   --color-positive: var(--positive);
   --color-critical: var(--critical);
+  --color-card: var(--card);
+  --color-card-ink: var(--card-ink);
+  --color-card-ink-soft: var(--card-ink-soft);
+  --color-card-line: var(--card-line);
+
+  --radius-sm: var(--r-sm);
+  --radius-md: var(--r-md);
+  --radius-lg: var(--r-lg);
 
   --font-sans: var(--font-sans-stack);
   --font-serif: var(--font-serif-stack);
@@ -60,6 +93,7 @@ body {
   color: var(--ink);
   font-family: var(--font-sans-stack);
   -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
 h1,
@@ -67,19 +101,63 @@ h2,
 h3 {
   font-family: var(--font-serif-stack);
   font-weight: 500;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.015em;
 }
 
 /* Money and account numbers: tabular figures. */
 .tnum {
   font-family: var(--font-mono-stack);
   font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
 }
 
 :focus-visible {
   outline: 2px solid var(--focus);
   outline-offset: 2px;
-  border-radius: 2px;
+  border-radius: 3px;
+}
+
+/* Entrance animation — add .rise plus an optional .rise-1..4 for stagger. */
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.rise {
+  animation: rise 0.5s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+.rise-1 {
+  animation-delay: 60ms;
+}
+.rise-2 {
+  animation-delay: 120ms;
+}
+.rise-3 {
+  animation-delay: 180ms;
+}
+.rise-4 {
+  animation-delay: 240ms;
+}
+
+@keyframes shimmer {
+  100% {
+    background-position: -200% 0;
+  }
+}
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--surface-sunk) 0%,
+    var(--line) 50%,
+    var(--surface-sunk) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.4s ease-in-out infinite;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -87,6 +165,7 @@ h3 {
   *::before,
   *::after {
     animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
 }
