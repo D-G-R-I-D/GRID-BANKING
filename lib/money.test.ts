@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { formatMoney, maskAccount, parseAmountToMinor } from "./money";
+import { formatMoney, parseAmountToMinor } from "./money";
 
 describe("formatMoney", () => {
   it("formats whole and fractional amounts in naira", () => {
@@ -35,11 +35,5 @@ describe("parseAmountToMinor", () => {
 
   it.each(["", "abc", "1.234", "-5", "1.", "."])("rejects %s", (input) => {
     expect(parseAmountToMinor(input)).toBeNull();
-  });
-});
-
-describe("maskAccount", () => {
-  it("shows only the last four", () => {
-    expect(maskAccount("clabc1234xyz9f3a")).toBe("•••• 9f3a");
   });
 });

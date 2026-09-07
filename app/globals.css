@@ -2,49 +2,107 @@
 
 /*
   GRID design tokens — mature, minimal, near-monochrome.
-  Warm paper / near-black ink / one quiet green accent.
+  Warm paper, near-black ink, one quiet green accent, and a single
+  always-dark "money card" surface for contrast.
+
+  Theme resolves in three ways:
+    - default            -> light
+    - system dark        -> :root:not([data-theme="light"]) under the media query
+    - explicit override  -> :root[data-theme="dark"] / [data-theme="light"]
 */
 :root {
-  --paper: #faf9f7;
+  --paper: #fafafb;
   --surface: #ffffff;
-  --ink: #0b0b0c;
-  --ink-soft: #52504b;
-  --ink-faint: #8b887f;
-  --line: #e7e4dd;
-  --accent: #1e3a2f;
-  --accent-ink: #faf9f7;
-  --positive: #2f6b4f;
-  --critical: #8a2f2f;
-  --focus: #1e3a2f;
+  --surface-sunk: #f1f1f5;
+  --ink: #14151a;
+  --ink-soft: #5a5b66;
+  --ink-faint: #9092a0;
+  --line: #e7e7ef;
+
+  --accent: #6366d9;
+  --accent-ink: #ffffff;
+  --accent-soft: #eeeffb;
+  --positive: #2f9e68;
+  --critical: #dc6660;
+  --focus: #6366d9;
+
+  --card: #171826;
+  --card-ink: #f3f3f8;
+  --card-ink-soft: #a3a4b8;
+  --card-line: #2c2d3d;
+
+  --r-sm: 0.5rem;
+  --r-md: 0.875rem;
+  --r-lg: 1.25rem;
+  --shadow-sm: 0 1px 2px rgb(16 16 12 / 0.05);
+  --shadow-md: 0 8px 30px -14px rgb(16 16 12 / 0.22);
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --paper: #0c0c0d;
-    --surface: #141414;
-    --ink: #f2f1ec;
-    --ink-soft: #b4b1a8;
-    --ink-faint: #7d7a72;
-    --line: #262523;
-    --accent: #7fb79b;
-    --accent-ink: #0c0c0d;
-    --positive: #7fb79b;
-    --critical: #d98a8a;
-    --focus: #7fb79b;
+    --paper: #0c0d12;
+    --surface: #16171f;
+    --surface-sunk: #101118;
+    --ink: #f2f2f7;
+    --ink-soft: #a9aab8;
+    --ink-faint: #74757f;
+    --line: #262735;
+    --accent: #9b9ef0;
+    --accent-ink: #12131a;
+    --accent-soft: #1e2033;
+    --positive: #5bc98e;
+    --critical: #f0928c;
+    --focus: #9b9ef0;
+    --card: #1c1d2b;
+    --card-ink: #f3f3f8;
+    --card-ink-soft: #a3a4b8;
+    --card-line: #33344a;
+    --shadow-md: 0 8px 30px -14px rgb(0 0 0 / 0.6);
   }
+}
+
+:root[data-theme="dark"] {
+  --paper: #0c0d12;
+  --surface: #16171f;
+  --surface-sunk: #101118;
+  --ink: #f2f2f7;
+  --ink-soft: #a9aab8;
+  --ink-faint: #74757f;
+  --line: #262735;
+  --accent: #9b9ef0;
+  --accent-ink: #12131a;
+  --accent-soft: #1e2033;
+  --positive: #5bc98e;
+  --critical: #f0928c;
+  --focus: #9b9ef0;
+  --card: #1c1d2b;
+  --card-ink: #f3f3f8;
+  --card-ink-soft: #a3a4b8;
+  --card-line: #33344a;
+  --shadow-md: 0 8px 30px -14px rgb(0 0 0 / 0.6);
 }
 
 @theme inline {
   --color-paper: var(--paper);
   --color-surface: var(--surface);
+  --color-surface-sunk: var(--surface-sunk);
   --color-ink: var(--ink);
   --color-ink-soft: var(--ink-soft);
   --color-ink-faint: var(--ink-faint);
   --color-line: var(--line);
   --color-accent: var(--accent);
   --color-accent-ink: var(--accent-ink);
+  --color-accent-soft: var(--accent-soft);
   --color-positive: var(--positive);
   --color-critical: var(--critical);
+  --color-card: var(--card);
+  --color-card-ink: var(--card-ink);
+  --color-card-ink-soft: var(--card-ink-soft);
+  --color-card-line: var(--card-line);
+
+  --radius-sm: var(--r-sm);
+  --radius-md: var(--r-md);
+  --radius-lg: var(--r-lg);
 
   --font-sans: var(--font-sans-stack);
   --font-serif: var(--font-serif-stack);
@@ -55,11 +113,22 @@
   border-color: var(--line);
 }
 
+html {
+  color-scheme: light dark;
+  /* Kill pinch-zoom / double-tap-zoom — iOS Safari ignores user-scalable=no,
+     but it respects touch-action. This is an app, not a document. */
+  touch-action: pan-x pan-y;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
 body {
   background: var(--paper);
   color: var(--ink);
   font-family: var(--font-sans-stack);
   -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overscroll-behavior-y: none;
 }
 
 h1,
@@ -67,19 +136,93 @@ h2,
 h3 {
   font-family: var(--font-serif-stack);
   font-weight: 500;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.015em;
 }
 
-/* Money and account numbers: tabular figures. */
 .tnum {
   font-family: var(--font-mono-stack);
   font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
 }
 
 :focus-visible {
   outline: 2px solid var(--focus);
   outline-offset: 2px;
-  border-radius: 2px;
+  border-radius: 3px;
+}
+
+/* Entrance — .rise + optional .rise-1..4 for stagger. */
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.rise {
+  animation: rise 0.5s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+.rise-1 {
+  animation-delay: 60ms;
+}
+.rise-2 {
+  animation-delay: 120ms;
+}
+.rise-3 {
+  animation-delay: 180ms;
+}
+.rise-4 {
+  animation-delay: 240ms;
+}
+
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.toast-in {
+  animation: toast-in 0.28s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+@keyframes pop {
+  0% {
+    transform: scale(0.6);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.08);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+.pop {
+  animation: pop 0.4s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+@keyframes shimmer {
+  100% {
+    background-position: -200% 0;
+  }
+}
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--surface-sunk) 0%,
+    var(--line) 50%,
+    var(--surface-sunk) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.4s ease-in-out infinite;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -87,6 +230,7 @@ h3 {
   *::before,
   *::after {
     animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
 }
