@@ -1,10 +1,8 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import { db } from "@/lib/db";
-import { hashPassword } from "@/lib/auth";
 import { startSession } from "@/lib/session";
-import { provisionStarterAccounts } from "@/lib/accounts";
+import { register } from "@/lib/services/auth-service";
 import { signUpSchema } from "@/lib/validation";
 import { firstFieldErrors, type FormState } from "@/lib/form";
 
@@ -17,19 +15,9 @@ export async function signUpAction(
     return { fieldErrors: firstFieldErrors(parsed.error) };
   }
 
-  const { name, email, password } = parsed.data;
+  const result = await register(parsed.data);
+  if (!result.ok) return { error: result.error };
 
-  const existing = await db.user.findUnique({ where: { email } });
-  if (existing) {
-    // Don't confirm or deny which emails exist beyond this generic message.
-    return { error: "We couldn't create that account. Try signing in." };
-  }
-
-  const user = await db.user.create({
-    data: { name, email, passwordHash: await hashPassword(password) },
-  });
-  await provisionStarterAccounts(user.id);
-  await startSession(user.id);
-
+  await startSession(result.userId);
   redirect("/dashboard");
 }

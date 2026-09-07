@@ -15,7 +15,7 @@ export default async function AuthLayout({
     <main className="mx-auto flex min-h-dvh w-full max-w-sm flex-col justify-center px-6 py-16">
       <Link
         href="/"
-        className="mb-10 font-serif text-lg tracking-tight text-ink"
+        className="mb-8 font-serif text-xl tracking-tight text-ink"
       >
         GRID
       </Link>
