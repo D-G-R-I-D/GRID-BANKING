@@ -8,7 +8,24 @@ async function main() {
   const phone = "+2348012345678";
   const passwordHash = await bcrypt.hash("demo-password-123", 12);
 
-  await db.user.deleteMany({ where: { email } });
+  // Clean any previous demo data in FK-safe order so the seed is re-runnable.
+  const existing = await db.user.findUnique({
+    where: { email },
+    include: { accounts: true },
+  });
+  if (existing) {
+    const accountIds = existing.accounts.map((a) => a.id);
+    await db.transfer.deleteMany({
+      where: {
+        OR: [
+          { fromAccountId: { in: accountIds } },
+          { toAccountId: { in: accountIds } },
+        ],
+      },
+    });
+    await db.account.deleteMany({ where: { userId: existing.id } });
+    await db.user.delete({ where: { id: existing.id } });
+  }
 
   const user = await db.user.create({
     data: {
