@@ -4,7 +4,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { cache } from "react";
 import { findUserById } from "@/lib/data/users";
-import { checkExpiry } from "@/lib/session-policy";
+import { checkExpiry, stepUpIsValid } from "@/lib/session-policy";
 import { sessionOptions, type SessionData } from "@/lib/session-config";
 
 export type { SessionData } from "@/lib/session-config";
@@ -35,6 +35,19 @@ export async function startSession(userId: string) {
 export async function endSession() {
   const session = await getSession();
   session.destroy();
+}
+
+/** Record that the user just re-entered their password. */
+export async function grantStepUp() {
+  const session = await getSession();
+  session.stepUpAt = Date.now();
+  await session.save();
+}
+
+/** True if a recent password confirmation is still trusted. */
+export async function hasStepUp(): Promise<boolean> {
+  const session = await getSession();
+  return stepUpIsValid(session.stepUpAt);
 }
 
 /**

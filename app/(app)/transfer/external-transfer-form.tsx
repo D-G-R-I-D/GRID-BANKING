@@ -1,40 +1,40 @@
 "use client";
 
-import {
-  useActionState,
-  useEffect,
-  useMemo,
-  useState,
-  useTransition,
-} from "react";
-import { useRouter } from "next/navigation";
+import { useState, useTransition } from "react";
 import { Check, Users } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { Field } from "@/components/ui/field";
 import { Spinner } from "@/components/ui/spinner";
-import { useToast } from "@/components/toast";
+import { MoneyAmount } from "@/components/money-amount";
+import { parseAmountToMinor } from "@/lib/money";
 import type { RecipientView } from "@/lib/view";
-import {
-  externalTransferAction,
-  lookupRecipientAction,
-  type TransferState,
-} from "./actions";
+import { externalTransferAction, lookupRecipientAction } from "./actions";
+import { useTransferFlow } from "./use-transfer-flow";
+import { ConfirmStep } from "./confirm-step";
 
-const initial: TransferState = {};
-
-export function ExternalTransferForm() {
-  const router = useRouter();
-  const { toast } = useToast();
-  const [state, action, pending] = useActionState(
-    externalTransferAction,
-    initial,
-  );
-  const idempotencyKey = useMemo(() => crypto.randomUUID(), []);
+export function ExternalTransferForm({
+  stepUpActive,
+}: {
+  stepUpActive: boolean;
+}) {
+  const {
+    state,
+    formAction,
+    pending,
+    confirming,
+    setConfirming,
+    idempotencyKey,
+  } = useTransferFlow(externalTransferAction);
 
   const [acct, setAcct] = useState("");
+  const [amount, setAmount] = useState("");
+  const [note, setNote] = useState("");
+  const [amountError, setAmountError] = useState<string>();
   const [recipient, setRecipient] = useState<RecipientView | null>(null);
   const [notFound, setNotFound] = useState(false);
   const [looking, startLookup] = useTransition();
+
+  const amountMinor = parseAmountToMinor(amount);
 
   function onAcctChange(value: string) {
     const digits = value.replace(/\D/g, "").slice(0, 10);
@@ -50,15 +50,18 @@ export function ExternalTransferForm() {
     }
   }
 
-  useEffect(() => {
-    if (state.success) {
-      toast(`Sent to ${recipient?.name ?? "recipient"}`);
-      router.refresh();
+  function toReview() {
+    if (!recipient) return;
+    if (amountMinor === null || amountMinor <= 0) {
+      setAmountError("Enter a valid amount, e.g. 25.00");
+      return;
     }
-  }, [state, toast, router, recipient]);
+    setAmountError(undefined);
+    setConfirming(true);
+  }
 
   return (
-    <form action={action} className="flex flex-col gap-4">
+    <form action={formAction} className="flex flex-col gap-4">
       <input
         type="hidden"
         name="idempotencyKey"
@@ -70,65 +73,86 @@ export function ExternalTransferForm() {
         value={acct}
         readOnly
       />
+      <input type="hidden" name="amount" value={amount} readOnly />
+      <input type="hidden" name="note" value={note} readOnly />
 
-      <Field
-        label="Recipient account number"
-        inputMode="numeric"
-        placeholder="10 digits"
-        value={acct}
-        onChange={(e) => onAcctChange(e.target.value)}
-        error={notFound ? "No GRID account with that number" : undefined}
-        hint={looking ? "Checking…" : undefined}
-      />
+      <div hidden={confirming} className="flex flex-col gap-4">
+        <Field
+          label="Recipient account number"
+          inputMode="numeric"
+          placeholder="10 digits"
+          value={acct}
+          onChange={(e) => onAcctChange(e.target.value)}
+          error={notFound ? "No GRID account with that number" : undefined}
+          hint={looking ? "Checking…" : undefined}
+        />
 
-      {recipient && (
-        <div className="pop flex items-center gap-3 rounded-md border border-line bg-accent-soft p-3">
-          <span className="grid h-9 w-9 place-items-center rounded-full bg-accent text-accent-ink">
-            <Users size={16} />
-          </span>
-          <div className="min-w-0">
-            <p className="truncate text-sm font-medium text-ink">
-              {recipient.name}
-            </p>
-            <p className="tnum text-xs text-ink-faint">
-              {recipient.accountNumber}
-            </p>
+        {recipient && (
+          <div className="pop flex items-center gap-3 rounded-md border border-line bg-accent-soft p-3">
+            <span className="grid h-9 w-9 place-items-center rounded-full bg-accent text-accent-ink">
+              <Users size={16} />
+            </span>
+            <div className="min-w-0">
+              <p className="truncate text-sm font-medium text-ink">
+                {recipient.name}
+              </p>
+              <p className="tnum text-xs text-ink-faint">
+                {recipient.accountNumber}
+              </p>
+            </div>
+            <Check size={16} className="ml-auto text-positive" />
           </div>
-          <Check size={16} className="ml-auto text-positive" />
-        </div>
-      )}
-
-      <Field
-        label="Amount"
-        name="amount"
-        inputMode="decimal"
-        placeholder="0.00"
-        prefix="₦"
-        required
-        error={state.fieldErrors?.amount}
-      />
-      <Field
-        label="Note (optional)"
-        name="note"
-        maxLength={140}
-        error={state.fieldErrors?.note}
-      />
-
-      {state.error && (
-        <p role="alert" className="text-sm text-critical">
-          {state.error}
-        </p>
-      )}
-
-      <Button type="submit" size="lg" pending={pending} disabled={!recipient}>
-        {pending ? (
-          "Sending…"
-        ) : recipient ? (
-          `Send to ${recipient.name}`
-        ) : (
-          <>{looking && <Spinner size={14} />} Enter an account number</>
         )}
-      </Button>
+
+        <Field
+          label="Amount"
+          inputMode="decimal"
+          placeholder="0.00"
+          prefix="₦"
+          value={amount}
+          onChange={(e) => setAmount(e.target.value)}
+          error={amountError}
+        />
+        <Field
+          label="Note (optional)"
+          maxLength={140}
+          value={note}
+          onChange={(e) => setNote(e.target.value)}
+        />
+
+        <Button
+          type="button"
+          size="lg"
+          onClick={toReview}
+          disabled={!recipient || looking}
+        >
+          {looking && <Spinner size={14} />}
+          {recipient ? "Review transfer" : "Enter an account number"}
+        </Button>
+      </div>
+
+      {confirming && recipient && (
+        <ConfirmStep
+          rows={[
+            { label: "To", value: recipient.name },
+            {
+              label: "Account",
+              value: <span className="tnum">{recipient.accountNumber}</span>,
+            },
+            {
+              label: "Amount",
+              value: <MoneyAmount minorUnits={amountMinor ?? 0} />,
+            },
+            ...(note ? [{ label: "Note", value: note }] : []),
+          ]}
+          needsPassword={!stepUpActive}
+          passwordError={state.fieldErrors?.password}
+          error={state.error}
+          pending={pending}
+          buttonLabel={`Send ₦${amount}`}
+          onBack={() => setConfirming(false)}
+        />
+      )}
     </form>
   );
 }

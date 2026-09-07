@@ -8,6 +8,8 @@ export interface SessionData {
   userId?: string;
   createdAt?: number;
   lastSeenAt?: number;
+  /** When the user last re-entered their password for a sensitive action. */
+  stepUpAt?: number;
 }
 
 export function sessionOptions(): SessionOptions {

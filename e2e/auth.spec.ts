@@ -19,11 +19,26 @@ test("a new person can sign up and land on their dashboard", async ({
   await expect(page.getByText("Flow").first()).toBeVisible();
 });
 
-test("the transfer screen has both modes", async ({ page }) => {
+test("an internal transfer needs a password and produces a receipt", async ({
+  page,
+}) => {
   await signUp(page, "mover");
   await page.goto("/transfer");
+
   await expect(page.getByRole("tab", { name: "My accounts" })).toBeVisible();
   await expect(page.getByRole("tab", { name: "Someone else" })).toBeVisible();
+
+  await page.getByLabel("Amount").fill("50");
+  await page.getByRole("button", { name: "Review transfer" }).click();
+
+  // step-up: fresh account has no recent confirmation
+  await expect(page.getByText("Confirm this transfer")).toBeVisible();
+  await page.getByLabel("Your password").fill("a-strong-passphrase");
+  await page.getByRole("button", { name: /Move ₦50/ }).click();
+
+  await expect(page).toHaveURL(/\/transfer\/receipt\//);
+  await expect(page.getByText("Reference")).toBeVisible();
+  await expect(page.getByText("Successful")).toBeVisible();
 });
 
 test("protected routes redirect anonymous visitors", async ({ page }) => {

@@ -4,6 +4,7 @@ import { accountNumberFromPhone, normalizePhone } from "@/lib/phone";
 import { createStarterAccounts } from "@/lib/data/accounts";
 import {
   createUser,
+  findUserById,
   findUserByEmail,
   findUserByEmailOrPhone,
 } from "@/lib/data/users";
@@ -45,4 +46,13 @@ export async function authenticate(
   const user = await findUserByEmail(email);
   const ok = user ? await verifyPassword(password, user.passwordHash) : false;
   return user && ok ? user.id : null;
+}
+
+/** Step-up check: does this password match the signed-in user's? */
+export async function verifyUserPassword(
+  userId: string,
+  password: string,
+): Promise<boolean> {
+  const user = await findUserById(userId);
+  return user ? verifyPassword(password, user.passwordHash) : false;
 }

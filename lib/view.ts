@@ -41,6 +41,18 @@ export interface RecipientView {
   accountNumber: string;
 }
 
+export interface ReceiptView {
+  reference: string;
+  at: Date;
+  amountMinor: number;
+  currency: string;
+  fromLabel: string;
+  toLabel: string;
+  toAccountNumber: string | null;
+  note: string | null;
+  kind: "internal" | "external";
+}
+
 export interface ProfileView {
   name: string;
   email: string;

@@ -8,7 +8,13 @@ import { ExternalTransferForm } from "./external-transfer-form";
 
 type Tab = "internal" | "external";
 
-export function TransferTabs({ accounts }: { accounts: AccountView[] }) {
+export function TransferTabs({
+  accounts,
+  stepUpActive,
+}: {
+  accounts: AccountView[];
+  stepUpActive: boolean;
+}) {
   const [tab, setTab] = useState<Tab>("internal");
 
   return (
@@ -47,9 +53,9 @@ export function TransferTabs({ accounts }: { accounts: AccountView[] }) {
       </div>
 
       {tab === "internal" ? (
-        <InternalTransferForm accounts={accounts} />
+        <InternalTransferForm accounts={accounts} stepUpActive={stepUpActive} />
       ) : (
-        <ExternalTransferForm />
+        <ExternalTransferForm stepUpActive={stepUpActive} />
       )}
     </div>
   );

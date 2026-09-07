@@ -18,6 +18,20 @@ function envInt(name: string, fallback: number): number {
 export const IDLE_TIMEOUT_MS = minutes(envInt("SESSION_IDLE_MINUTES", 20));
 export const ABSOLUTE_TIMEOUT_MS = hours(envInt("SESSION_ABSOLUTE_HOURS", 12));
 
+/**
+ * Step-up: after you re-enter your password for a sensitive action (moving
+ * money, changing security settings) that confirmation is trusted for this
+ * long before we ask again.
+ */
+export const STEP_UP_TTL_MS = minutes(envInt("STEP_UP_MINUTES", 5));
+
+export function stepUpIsValid(
+  stepUpAt: number | undefined,
+  now: number = Date.now(),
+): boolean {
+  return typeof stepUpAt === "number" && now - stepUpAt < STEP_UP_TTL_MS;
+}
+
 /** iron-session cookie TTL (seconds): the idle window is the backstop. */
 export const COOKIE_TTL_SECONDS = Math.floor(IDLE_TIMEOUT_MS / 1000);
 

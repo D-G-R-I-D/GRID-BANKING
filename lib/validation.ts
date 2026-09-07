@@ -21,12 +21,16 @@ export const signInSchema = z.object({
 });
 export type SignInInput = z.infer<typeof signInSchema>;
 
+// Present when the step-up window has lapsed; the action verifies it.
+const stepUpPassword = z.string().min(1).optional();
+
 export const internalTransferSchema = z.object({
   fromAccountId: z.string().min(1, "Choose an account"),
   toAccountId: z.string().min(1, "Choose an account"),
   amount: z.string().min(1, "Enter an amount"),
   note: z.string().trim().max(140).optional(),
   idempotencyKey: z.string().uuid(),
+  password: stepUpPassword,
 });
 export type InternalTransferInput = z.infer<typeof internalTransferSchema>;
 
@@ -40,6 +44,7 @@ export const externalTransferSchema = z.object({
   amount: z.string().min(1, "Enter an amount"),
   note: z.string().trim().max(140).optional(),
   idempotencyKey: z.string().uuid(),
+  password: stepUpPassword,
 });
 export type ExternalTransferInput = z.infer<typeof externalTransferSchema>;
 

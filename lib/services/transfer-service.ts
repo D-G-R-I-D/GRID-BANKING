@@ -4,13 +4,21 @@ import { db } from "@/lib/db";
 import { parseAmountToMinor } from "@/lib/money";
 import { toAccountView } from "@/lib/services/mappers";
 import { listAccountsByUser } from "@/lib/data/accounts";
-import { findTransferByIdempotencyKey } from "@/lib/data/transfers";
+import {
+  findTransferByIdempotencyKey,
+  findTransferWithPartiesById,
+} from "@/lib/data/transfers";
 import { findRecipientByAccountNumber } from "@/lib/data/users";
+import { transferReference } from "@/lib/reference";
 import type {
   ExternalTransferInput,
   InternalTransferInput,
 } from "@/lib/validation";
-import type { RecipientView, TransferTargetsView } from "@/lib/view";
+import type {
+  ReceiptView,
+  RecipientView,
+  TransferTargetsView,
+} from "@/lib/view";
 
 export type TransferResult =
   { ok: true; transferId: string } | { ok: false; error: string };
@@ -22,6 +30,38 @@ export async function getTransferTargets(
 ): Promise<TransferTargetsView> {
   const accounts = await listAccountsByUser(userId);
   return { accounts: accounts.map(toAccountView) };
+}
+
+/**
+ * A receipt for a completed transfer, from the signed-in user's viewpoint.
+ * Returns null if the transfer doesn't exist or isn't theirs.
+ */
+export async function getReceipt(
+  userId: string,
+  transferId: string,
+): Promise<ReceiptView | null> {
+  const t = await findTransferWithPartiesById(transferId);
+  if (!t) return null;
+
+  const mine = t.fromAccount.userId === userId || t.toAccount.userId === userId;
+  if (!mine) return null;
+
+  const internal =
+    t.fromAccount.userId === userId && t.toAccount.userId === userId;
+
+  return {
+    reference: transferReference(t.id),
+    at: t.createdAt,
+    amountMinor: t.amountMinor,
+    currency: t.currency,
+    fromLabel: internal
+      ? t.fromAccount.name
+      : `${t.fromAccount.user.name} · ${t.fromAccount.name}`,
+    toLabel: internal ? t.toAccount.name : t.toAccount.user.name,
+    toAccountNumber: internal ? null : t.toAccount.user.accountNumber,
+    note: t.note,
+    kind: internal ? "internal" : "external",
+  };
 }
 
 /** Preview a recipient before sending — returns their name, or null. */
