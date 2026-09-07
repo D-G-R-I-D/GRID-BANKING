@@ -16,7 +16,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
       # Reports every advisory but doesn't block: the current highs are in
       # dev-only tooling (prisma CLI -> deepmerge-ts) with no production impact.
       # Dependabot bumps them when upstream patches. Tighten to blocking once
