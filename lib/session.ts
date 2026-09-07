@@ -3,10 +3,18 @@ import { getIronSession, type SessionOptions } from "iron-session";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { cache } from "react";
-import { db } from "./db";
+import { findUserById } from "@/lib/data/users";
 
 export interface SessionData {
   userId?: string;
+}
+
+export interface CurrentUser {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  accountNumber: string;
 }
 
 function sessionOptions(): SessionOptions {
@@ -42,18 +50,23 @@ export async function endSession() {
   session.destroy();
 }
 
-/** Current user or null. Cached per request. */
-export const getCurrentUser = cache(async () => {
+/** Current user (safe fields only) or null. Cached per request. */
+export const getCurrentUser = cache(async (): Promise<CurrentUser | null> => {
   const session = await getSession();
   if (!session.userId) return null;
-  return db.user.findUnique({
-    where: { id: session.userId },
-    select: { id: true, name: true, email: true },
-  });
+  const user = await findUserById(session.userId);
+  if (!user) return null;
+  return {
+    id: user.id,
+    name: user.name,
+    email: user.email,
+    phone: user.phone,
+    accountNumber: user.accountNumber,
+  };
 });
 
 /** Use in a Server Component / layout to gate a route. */
-export async function requireUser() {
+export async function requireUser(): Promise<CurrentUser> {
   const user = await getCurrentUser();
   if (!user) redirect("/sign-in");
   return user;

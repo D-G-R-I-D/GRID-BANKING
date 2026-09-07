@@ -1,9 +1,8 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import { db } from "@/lib/db";
-import { verifyPassword } from "@/lib/auth";
 import { startSession } from "@/lib/session";
+import { authenticate } from "@/lib/services/auth-service";
 import { signInSchema } from "@/lib/validation";
 import { firstFieldErrors, type FormState } from "@/lib/form";
 
@@ -16,15 +15,9 @@ export async function signInAction(
     return { fieldErrors: firstFieldErrors(parsed.error) };
   }
 
-  const { email, password } = parsed.data;
-  const user = await db.user.findUnique({ where: { email } });
+  const userId = await authenticate(parsed.data.email, parsed.data.password);
+  if (!userId) return { error: "Email or password is incorrect" };
 
-  // Same generic message and similar timing whether or not the user exists.
-  const ok = user ? await verifyPassword(password, user.passwordHash) : false;
-  if (!user || !ok) {
-    return { error: "Email or password is incorrect" };
-  }
-
-  await startSession(user.id);
+  await startSession(userId);
   redirect("/dashboard");
 }

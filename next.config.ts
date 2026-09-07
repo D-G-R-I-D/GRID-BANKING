@@ -20,7 +20,17 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
   async headers() {
-    return [{ source: "/:path*", headers: securityHeaders }];
+    return [
+      {
+        source: "/:path*",
+        headers: securityHeaders,
+      },
+      {
+        // Never let the browser cache authenticated app pages.
+        source: "/(dashboard|transfer|activity|settings)(.*)",
+        headers: [{ key: "Cache-Control", value: "no-store, must-revalidate" }],
+      },
+    ];
   },
 };
 

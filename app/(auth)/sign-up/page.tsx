@@ -16,7 +16,7 @@ export default function SignUpPage() {
     <div>
       <h1 className="text-2xl">Open your account</h1>
       <p className="mt-2 text-sm text-ink-soft">
-        A current and a savings account, ready in a minute.
+        Your phone number becomes your account number.
       </p>
 
       <form action={action} className="mt-8 flex flex-col gap-4">
@@ -36,6 +36,17 @@ export default function SignUpPage() {
           error={state.fieldErrors?.email}
         />
         <Field
+          label="Phone number"
+          name="phone"
+          type="tel"
+          autoComplete="tel"
+          inputMode="tel"
+          placeholder="0803 123 4567"
+          required
+          hint="Nigerian mobile number."
+          error={state.fieldErrors?.phone}
+        />
+        <Field
           label="Password"
           name="password"
           type="password"
@@ -51,7 +62,7 @@ export default function SignUpPage() {
           </p>
         )}
 
-        <Button type="submit" disabled={pending} className="mt-2">
+        <Button type="submit" size="lg" disabled={pending} className="mt-2">
           {pending ? "Creating account…" : "Create account"}
         </Button>
       </form>

@@ -1,31 +1,19 @@
 import Link from "next/link";
-import { signOutAction } from "@/app/(app)/actions";
 
-export function AppHeader({ userName }: { userName: string }) {
+export function AppHeader({ initials }: { initials: string }) {
   return (
-    <header className="border-b border-line">
-      <div className="mx-auto flex h-14 w-full max-w-3xl items-center justify-between px-6">
-        <div className="flex items-center gap-6">
-          <Link href="/dashboard" className="font-serif text-lg tracking-tight">
-            GRID
-          </Link>
-          <nav className="flex items-center gap-4 text-sm text-ink-soft">
-            <Link href="/dashboard" className="hover:text-ink">
-              Dashboard
-            </Link>
-            <Link href="/transfer" className="hover:text-ink">
-              Move money
-            </Link>
-          </nav>
-        </div>
-        <div className="flex items-center gap-3 text-sm text-ink-soft">
-          <span className="hidden sm:inline">{userName}</span>
-          <form action={signOutAction}>
-            <button type="submit" className="hover:text-ink">
-              Sign out
-            </button>
-          </form>
-        </div>
+    <header className="sticky top-0 z-10 border-b border-line bg-paper/90 backdrop-blur">
+      <div className="mx-auto flex h-14 max-w-md items-center justify-between px-4">
+        <Link href="/dashboard" className="font-serif text-lg tracking-tight">
+          GRID
+        </Link>
+        <Link
+          href="/settings"
+          aria-label="Profile"
+          className="grid h-8 w-8 place-items-center rounded-full bg-surface-sunk text-xs font-medium text-ink-soft"
+        >
+          {initials}
+        </Link>
       </div>
     </header>
   );
