@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { Check, Copy, Eye, EyeOff } from "@/components/icons";
 import { formatMoney } from "@/lib/money";
-import { maskAccountNumber } from "@/lib/phone";
 import { copyText } from "@/lib/clipboard";
 import { useToast } from "@/components/toast";
 
@@ -21,8 +20,12 @@ function greeting(): string {
   return "Good evening";
 }
 
+function groupNumber(n: string): string {
+  return `${n.slice(0, 3)} ${n.slice(3, 6)} ${n.slice(6)}`;
+}
+
 const iconBtn =
-  "grid h-9 w-9 place-items-center rounded-full text-card-ink-soft transition-colors hover:bg-white/5 hover:text-card-ink active:scale-95";
+  "grid h-9 w-9 place-items-center rounded-full text-white/60 transition-colors hover:bg-white/10 hover:text-white active:scale-95";
 
 export function BalanceCard({
   balanceMinor,
@@ -47,41 +50,56 @@ export function BalanceCard({
   }
 
   return (
-    <section className="relative overflow-hidden rounded-lg bg-card p-5 text-card-ink shadow-[var(--shadow-md)]">
-      <div className="pointer-events-none absolute -right-16 -top-16 h-40 w-40 rounded-full bg-white/[0.04] blur-2xl" />
+    <section
+      className="relative isolate overflow-hidden rounded-lg p-5 text-white shadow-[var(--shadow-md)]"
+      style={{
+        background:
+          "radial-gradient(120% 120% at 100% 0%, #2b2d5c 0%, #1a1b32 45%, #101018 100%)",
+      }}
+    >
+      {/* sheen */}
+      <div className="pointer-events-none absolute -left-1/3 -top-1/2 -z-10 h-[200%] w-2/3 rotate-12 bg-white/[0.06] blur-2xl" />
 
-      <p className="text-sm text-card-ink-soft">
-        {greeting()}, {firstName}
-      </p>
+      <div className="flex items-start justify-between">
+        <p className="text-sm text-white/60">
+          {greeting()}, {firstName}
+        </p>
+        <span className="font-serif text-sm tracking-tight text-white/80">
+          GRID
+        </span>
+      </div>
 
-      <div className="mt-3 flex items-center gap-2">
-        <p className="text-xs uppercase tracking-wide text-card-ink-soft">
-          Total balance
+      {/* chip */}
+      <div className="mt-4 h-7 w-10 rounded-[5px] bg-gradient-to-br from-[#d8c48a] to-[#a98f4d]" />
+
+      <div className="mt-4 flex items-center gap-2">
+        <p className="text-[0.7rem] uppercase tracking-widest text-white/50">
+          Balance
         </p>
         <button
           type="button"
           onClick={() => setShowBalance((v) => !v)}
           aria-pressed={showBalance}
           aria-label={showBalance ? "Hide balance" : "Show balance"}
-          className="grid h-6 w-6 place-items-center rounded-full text-card-ink-soft transition-colors hover:text-card-ink active:scale-95"
+          className="grid h-6 w-6 place-items-center rounded-full text-white/60 transition-colors hover:text-white active:scale-95"
         >
           {showBalance ? <Eye size={14} /> : <EyeOff size={14} />}
         </button>
       </div>
-      <p className="tnum mt-1 text-[2rem] leading-none">
+      <p className="tnum mt-0.5 text-[2rem] leading-none">
         {showBalance ? formatMoney(balanceMinor, currency) : "₦ ••••••"}
       </p>
 
-      <div className="mt-5 flex items-center justify-between border-t border-card-line pt-3">
+      <div className="mt-6 flex items-end justify-between">
         <div className="min-w-0">
-          <p className="text-[0.7rem] uppercase tracking-wide text-card-ink-soft">
+          <p className="text-[0.65rem] uppercase tracking-widest text-white/45">
             Account number
           </p>
-          <p className="tnum text-sm">
-            {showAccount ? accountNumber : maskAccountNumber(accountNumber)}
+          <p className="tnum mt-1 text-[0.95rem] tracking-[0.15em] text-white/90">
+            {showAccount ? groupNumber(accountNumber) : "••• ••• ••••"}
           </p>
         </div>
-        <div className="flex items-center gap-1">
+        <div className="flex shrink-0 items-center gap-1">
           <button
             type="button"
             onClick={() => setShowAccount((v) => !v)}
