@@ -31,8 +31,3 @@ export function parseAmountToMinor(input: string): number | null {
   const minor = Number(whole) * 100 + Number(frac.padEnd(2, "0"));
   return Number.isSafeInteger(minor) ? minor : null;
 }
-
-/** Mask an account id for display: "•••• 3f9a". */
-export function maskAccount(id: string): string {
-  return `•••• ${id.slice(-4)}`;
-}

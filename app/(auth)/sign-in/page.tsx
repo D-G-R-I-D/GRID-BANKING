@@ -41,7 +41,7 @@ export default function SignInPage() {
           </p>
         )}
 
-        <Button type="submit" disabled={pending} className="mt-2">
+        <Button type="submit" size="lg" disabled={pending} className="mt-2">
           {pending ? "Signing in…" : "Sign in"}
         </Button>
       </form>

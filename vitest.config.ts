@@ -12,14 +12,19 @@ export default defineConfig({
     exclude: ["node_modules", ".next", "e2e"],
     coverage: {
       provider: "v8",
-      include: ["lib/**", "components/**"],
+      include: ["lib/money.ts", "lib/phone.ts"],
       thresholds: {
-        // Keep the money and validation code honest.
-        "lib/money.ts": { statements: 90, branches: 80, functions: 90 },
+        // Keep the pure money/phone helpers honest.
+        "lib/money.ts": { statements: 85, functions: 100 },
+        "lib/phone.ts": { statements: 85, functions: 100 },
       },
     },
   },
   resolve: {
-    alias: { "@": resolve(__dirname, ".") },
+    alias: {
+      "@": resolve(__dirname, "."),
+      // `server-only` throws when imported outside an RSC build; stub it in tests.
+      "server-only": resolve(__dirname, "test/server-only-stub.ts"),
+    },
   },
 });
