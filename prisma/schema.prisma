@@ -1,0 +1,65 @@
+// GRID Banking — data model
+// Money is stored as integer minor units (cents). Never a float.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String    @id @default(cuid())
+  email        String    @unique
+  phone        String    @unique // normalised: +234XXXXXXXXXX
+  accountNumber String   @unique // last 10 digits of phone
+  name         String
+  dateOfBirth  DateTime?
+  passwordHash String
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  accounts Account[]
+}
+
+enum AccountKind {
+  FLOW // money you spend
+  VAULT // money you keep
+}
+
+model Account {
+  id           String      @id @default(cuid())
+  userId       String
+  user         User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name         String
+  kind         AccountKind @default(FLOW)
+  // Cached balance in minor units. Kept in sync with transfers inside a
+  // single DB transaction (see lib/transfers.ts).
+  balanceMinor Int         @default(0)
+  currency     String      @default("NGN")
+  createdAt    DateTime    @default(now())
+
+  transfersOut Transfer[] @relation("transfersOut")
+  transfersIn  Transfer[] @relation("transfersIn")
+
+  @@index([userId])
+}
+
+model Transfer {
+  id             String   @id @default(cuid())
+  fromAccountId  String
+  toAccountId    String
+  fromAccount    Account  @relation("transfersOut", fields: [fromAccountId], references: [id])
+  toAccount      Account  @relation("transfersIn", fields: [toAccountId], references: [id])
+  amountMinor    Int
+  currency       String   @default("NGN")
+  note           String?
+  // Set by the client per submit attempt so a double-click can't double-send.
+  idempotencyKey String   @unique
+  createdAt      DateTime @default(now())
+
+  @@index([fromAccountId, createdAt])
+  @@index([toAccountId, createdAt])
+}
