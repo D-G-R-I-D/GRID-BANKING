@@ -18,6 +18,18 @@ export function findUserByEmailOrPhone(email: string, phone: string) {
   });
 }
 
+/** Resolve a recipient by account number, including their Flow account id. */
+export function findRecipientByAccountNumber(accountNumber: string) {
+  return db.user.findUnique({
+    where: { accountNumber },
+    select: {
+      id: true,
+      name: true,
+      accounts: { where: { kind: "FLOW" }, select: { id: true }, take: 1 },
+    },
+  });
+}
+
 interface CreateUserInput {
   name: string;
   email: string;

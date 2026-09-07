@@ -130,3 +130,31 @@ export const Sparkle = (p: IconProps) => (
     <path d="M12 3l2 6 6 2-6 2-2 6-2-6-6-2 6-2z" />
   </Icon>
 );
+
+export const Sun = (p: IconProps) => (
+  <Icon {...p}>
+    <circle cx="12" cy="12" r="4" />
+    <path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" />
+  </Icon>
+);
+
+export const Moon = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M12 3a6.5 6.5 0 0 0 9 9 9 9 0 1 1-9-9Z" />
+  </Icon>
+);
+
+export const Monitor = (p: IconProps) => (
+  <Icon {...p}>
+    <rect x="2" y="4" width="20" height="13" rx="2" />
+    <path d="M8 21h8M12 17v4" />
+  </Icon>
+);
+
+export const Users = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+    <circle cx="9" cy="7" r="4" />
+    <path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" />
+  </Icon>
+);

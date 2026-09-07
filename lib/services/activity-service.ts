@@ -9,10 +9,8 @@ export async function getActivity(
   limit = 20,
 ): Promise<ActivityView[]> {
   const accounts = await listAccountsByUser(userId);
-  const ids = accounts.map((a) => a.id);
-  const owned = new Set(ids);
-  const nameById = new Map(accounts.map((a) => [a.id, a.name]));
+  const owned = new Set(accounts.map((a) => a.id));
 
-  const transfers = await listTransfersForAccounts(ids, limit);
-  return transfers.map((t) => toActivityView(t, owned, nameById));
+  const transfers = await listTransfersForAccounts([...owned], limit);
+  return transfers.map((t) => toActivityView(t, owned));
 }

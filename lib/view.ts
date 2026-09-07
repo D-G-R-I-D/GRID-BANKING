@@ -36,6 +36,11 @@ export interface TransferTargetsView {
   accounts: AccountView[];
 }
 
+export interface RecipientView {
+  name: string;
+  accountNumber: string;
+}
+
 export interface ProfileView {
   name: string;
   email: string;

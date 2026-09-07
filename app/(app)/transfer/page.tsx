@@ -1,6 +1,6 @@
 import { requireUser } from "@/lib/session";
 import { getTransferTargets } from "@/lib/services/transfer-service";
-import { TransferForm } from "./transfer-form";
+import { TransferTabs } from "./transfer-tabs";
 
 export default async function TransferPage() {
   const user = await requireUser();
@@ -11,10 +11,10 @@ export default async function TransferPage() {
       <div>
         <h1 className="text-xl">Move money</h1>
         <p className="mt-1 text-sm text-ink-soft">
-          Between your own accounts. Instant, no fee.
+          Between your accounts, or to any GRID account number.
         </p>
       </div>
-      <TransferForm accounts={accounts} />
+      <TransferTabs accounts={accounts} />
     </div>
   );
 }

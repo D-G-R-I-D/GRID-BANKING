@@ -1,23 +1,41 @@
 "use client";
 
-import { useActionState, useMemo, useState } from "react";
+import { useActionState, useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import { ArrowDown } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { Field } from "@/components/ui/field";
+import { useToast } from "@/components/toast";
 import { formatMoney } from "@/lib/money";
 import { cn } from "@/lib/cn";
 import type { AccountView } from "@/lib/view";
-import { transferAction, type TransferState } from "./actions";
+import { internalTransferAction, type TransferState } from "./actions";
 
 const initial: TransferState = {};
 
-export function TransferForm({ accounts }: { accounts: AccountView[] }) {
-  const [state, action, pending] = useActionState(transferAction, initial);
+export function InternalTransferForm({
+  accounts,
+}: {
+  accounts: AccountView[];
+}) {
+  const router = useRouter();
+  const { toast } = useToast();
+  const [state, action, pending] = useActionState(
+    internalTransferAction,
+    initial,
+  );
   const idempotencyKey = useMemo(() => crypto.randomUUID(), []);
 
   const [fromId, setFromId] = useState(accounts[0]?.id ?? "");
   const from = accounts.find((a) => a.id === fromId) ?? accounts[0];
   const to = accounts.find((a) => a.id !== fromId) ?? accounts[1];
+
+  useEffect(() => {
+    if (state.success) {
+      toast(state.success);
+      router.refresh();
+    }
+  }, [state, toast, router]);
 
   return (
     <form action={action} className="flex flex-col gap-4">
@@ -39,9 +57,9 @@ export function TransferForm({ accounts }: { accounts: AccountView[] }) {
               onClick={() => setFromId(a.id)}
               aria-pressed={a.id === fromId}
               className={cn(
-                "rounded-md border p-3 text-left transition-colors",
+                "rounded-md border p-3 text-left transition-colors active:scale-[0.98]",
                 a.id === fromId
-                  ? "border-accent bg-surface-sunk"
+                  ? "border-accent bg-accent-soft"
                   : "border-line bg-surface hover:bg-surface-sunk",
               )}
             >
@@ -54,7 +72,7 @@ export function TransferForm({ accounts }: { accounts: AccountView[] }) {
         </div>
       </div>
 
-      <div className="flex items-center justify-center py-1 text-ink-faint">
+      <div className="flex items-center justify-center text-ink-faint">
         <ArrowDown size={16} />
       </div>
 
@@ -84,14 +102,9 @@ export function TransferForm({ accounts }: { accounts: AccountView[] }) {
           {state.error}
         </p>
       )}
-      {state.success && (
-        <p role="status" className="text-sm text-positive">
-          {state.success}
-        </p>
-      )}
 
-      <Button type="submit" size="lg" disabled={pending}>
-        {pending ? "Sending…" : `Send from ${from?.name ?? "account"}`}
+      <Button type="submit" size="lg" pending={pending}>
+        {pending ? "Moving…" : `Move from ${from?.name ?? "account"}`}
       </Button>
     </form>
   );
