@@ -4,7 +4,6 @@ import { useState } from "react";
 import { Check, Copy, Eye, EyeOff } from "@/components/icons";
 import { formatMoney } from "@/lib/money";
 import { maskAccountNumber } from "@/lib/phone";
-import { useCountUp } from "@/hooks/use-count-up";
 
 interface BalanceCardProps {
   balanceMinor: number;
@@ -21,7 +20,6 @@ export function BalanceCard({
 }: BalanceCardProps) {
   const [shown, setShown] = useState(false);
   const [copied, setCopied] = useState(false);
-  const animated = useCountUp(balanceMinor);
 
   async function copy() {
     try {
@@ -41,7 +39,7 @@ export function BalanceCard({
         Total balance
       </p>
       <p className="tnum mt-1 text-[2rem] leading-none">
-        {shown ? formatMoney(animated, currency) : "₦ ••••••"}
+        {shown ? formatMoney(balanceMinor, currency) : "₦ ••••••"}
       </p>
 
       <div className="mt-5 flex items-center justify-between border-t border-card-line pt-3">
