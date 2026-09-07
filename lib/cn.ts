@@ -1,10 +1,5 @@
 export type ClassValue =
-  | string
-  | number
-  | null
-  | false
-  | undefined
-  | ClassValue[];
+  string | number | null | false | undefined | ClassValue[];
 
 /** Tiny classNames joiner — no dependency. */
 export function cn(...inputs: ClassValue[]): string {

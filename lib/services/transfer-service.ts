@@ -9,8 +9,7 @@ import type { TransferInput } from "@/lib/validation";
 import type { TransferTargetsView } from "@/lib/view";
 
 export type TransferResult =
-  | { ok: true; transferId: string }
-  | { ok: false; error: string };
+  { ok: true; transferId: string } | { ok: false; error: string };
 
 export async function getTransferTargets(
   userId: string,

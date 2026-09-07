@@ -10,8 +10,7 @@ import {
 import type { SignUpInput } from "@/lib/validation";
 
 type RegisterResult =
-  | { ok: true; userId: string }
-  | { ok: false; error: string };
+  { ok: true; userId: string } | { ok: false; error: string };
 
 /** Create a user, derive their account number from their phone, open accounts. */
 export async function register(input: SignUpInput): Promise<RegisterResult> {
@@ -20,7 +19,10 @@ export async function register(input: SignUpInput): Promise<RegisterResult> {
 
   const clash = await findUserByEmailOrPhone(input.email, phone);
   if (clash) {
-    return { ok: false, error: "We couldn't create that account. Try signing in." };
+    return {
+      ok: false,
+      error: "We couldn't create that account. Try signing in.",
+    };
   }
 
   const user = await createUser({

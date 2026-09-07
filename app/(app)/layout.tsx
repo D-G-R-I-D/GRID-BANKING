@@ -15,7 +15,9 @@ export default async function AppLayout({
   return (
     <div className="flex min-h-dvh flex-col">
       <AppHeader initials={initials(user.name)} />
-      <main className="mx-auto w-full max-w-md flex-1 px-4 py-5">{children}</main>
+      <main className="mx-auto w-full max-w-md flex-1 px-4 py-5">
+        {children}
+      </main>
       <BottomNav />
     </div>
   );

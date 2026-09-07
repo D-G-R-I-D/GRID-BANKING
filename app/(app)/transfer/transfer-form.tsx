@@ -21,7 +21,11 @@ export function TransferForm({ accounts }: { accounts: AccountView[] }) {
 
   return (
     <form action={action} className="flex flex-col gap-4">
-      <input type="hidden" name="idempotencyKey" defaultValue={idempotencyKey} />
+      <input
+        type="hidden"
+        name="idempotencyKey"
+        defaultValue={idempotencyKey}
+      />
       <input type="hidden" name="toAccountId" value={to?.id ?? ""} readOnly />
       <input type="hidden" name="fromAccountId" value={fromId} readOnly />
 

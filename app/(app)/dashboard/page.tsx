@@ -36,7 +36,10 @@ export default async function DashboardPage() {
       <section className="rise rise-3 flex flex-col gap-2">
         <div className="flex items-center justify-between">
           <h2 className="text-sm font-medium text-ink-soft">Recent activity</h2>
-          <Link href="/activity" className="text-xs text-accent hover:underline">
+          <Link
+            href="/activity"
+            className="text-xs text-accent hover:underline"
+          >
             See all
           </Link>
         </div>
