@@ -7,24 +7,23 @@ async function main() {
   const email = "demo@grid.bank";
   const phone = "+2348012345678";
   const passwordHash = await bcrypt.hash("demo-password-123", 12);
+  const pin = "2580";
+  const pinHash = await bcrypt.hash(pin, 12);
 
-  // Clean any previous demo data in FK-safe order so the seed is re-runnable.
-  const existing = await db.user.findUnique({
-    where: { email },
-    include: { accounts: true },
-  });
+  // Never touch an existing demo user's money. Deleting its transfers used
+  // to "refund" it while the people it had paid kept the money, leaving the
+  // ledger out of balance. Re-running only backfills a missing PIN. For a
+  // truly clean slate use `npm run db:reset`.
+  const existing = await db.user.findUnique({ where: { email } });
   if (existing) {
-    const accountIds = existing.accounts.map((a) => a.id);
-    await db.transfer.deleteMany({
-      where: {
-        OR: [
-          { fromAccountId: { in: accountIds } },
-          { toAccountId: { in: accountIds } },
-        ],
-      },
-    });
-    await db.account.deleteMany({ where: { userId: existing.id } });
-    await db.user.delete({ where: { id: existing.id } });
+    if (!existing.pinHash) {
+      await db.user.update({
+        where: { id: existing.id },
+        data: { pinHash, pinLength: pin.length },
+      });
+    }
+    console.warn(`${email} already exists — left as is · PIN ${pin}`);
+    return;
   }
 
   const user = await db.user.create({
@@ -34,6 +33,8 @@ async function main() {
       accountNumber: phone.slice(-10),
       name: "Demo Person",
       passwordHash,
+      pinHash,
+      pinLength: pin.length,
       accounts: {
         create: [
           { name: "Flow", kind: "FLOW", balanceMinor: 184_200_00 },
@@ -58,7 +59,7 @@ async function main() {
     });
   }
 
-  console.warn(`Seeded ${email} / demo-password-123`);
+  console.warn(`Seeded ${email} / demo-password-123 · PIN ${pin}`);
 }
 
 main()
