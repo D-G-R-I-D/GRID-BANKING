@@ -66,7 +66,6 @@ components/
   live-updates.tsx         router.refresh() every 15s while active + on tab return;
                            toasts new incoming money. Stops after 2 min idle so the
                            session idle timeout still works
-  animated-money.tsx       <MoneyAmount> that counts to new values (use-count-up.ts)
   cashflow-card.tsx        weekly in/out chart; colours are --viz-in / --viz-out
                            (validated pair — don't swap for other hexes)
   network-badge.tsx        MTN/Airtel/Glo/9mobile marks; set NETWORKS[].logo to use

@@ -1,5 +1,5 @@
 import { Wallet, Lock } from "@/components/icons";
-import { AnimatedMoney } from "@/components/animated-money";
+import { MoneyAmount } from "@/components/money-amount";
 import type { AccountView } from "@/lib/view";
 
 export function AccountStrip({ accounts }: { accounts: AccountView[] }) {
@@ -23,7 +23,7 @@ export function AccountStrip({ accounts }: { accounts: AccountView[] }) {
                 </p>
               </div>
             </div>
-            <AnimatedMoney
+            <MoneyAmount
               minorUnits={a.balanceMinor}
               currency={a.currency}
               className="text-sm"
