@@ -37,27 +37,33 @@ receives `lib/view.ts` types. Services do the mapping (`lib/services/mappers.ts`
 app/
   page.tsx                 landing (public)
   (auth)/                  sign-up, sign-in — redirect to /dashboard if logged in
-  (app)/                   behind auth; layout calls requireUser(); app shell + bottom nav
-    dashboard/  transfer/  activity/  settings/
+  (onboarding)/set-pin     signed in but no PIN yet — mandatory PIN setup
+  (app)/                   behind auth + PIN; layout calls requireUserWithPin(); app shell + bottom nav
+    dashboard/  transfer/  loans/  activity/  settings/ (settings/pin)
     actions.ts             shared server actions (sign out)
 lib/
   db.ts                    Prisma client singleton
   data/                    repository layer — Prisma queries only
-    users.ts  accounts.ts  transfers.ts
+    users.ts  accounts.ts  transfers.ts  loans.ts
   services/                business logic — returns view models
     auth-service.ts  dashboard-service.ts  transfer-service.ts
     activity-service.ts  profile-service.ts  mappers.ts
+    pin-service.ts           verifyTransactionPin (lockout), setInitialPin, changePin
+    loan-service.ts          getLoans, applyForLoan, repayLoan
   view.ts                  view-model types (AccountView, ActivityView, ReceiptView, …)
   session.ts               iron-session: getSession, getCurrentUser, requireUser,
-                           grantStepUp / hasStepUp
+                           requireUserWithPin
   session-config.ts        cookie options + SessionData — Prisma-free (edge proxy imports it)
-  session-policy.ts        pure: checkExpiry (idle/absolute), stepUpIsValid — unit tested
+  session-policy.ts        pure: checkExpiry (idle/absolute) — unit tested
+  pin.ts  loan.ts          pure PIN policy + loan maths (client-safe) — unit tested
   validation.ts            Zod schemas
   auth.ts                  password hash/verify
   money.ts  phone.ts  reference.ts   pure helpers (unit tested)
-  name.ts  cn.ts  form.ts
+  name.ts  cn.ts  form.ts  date.ts (Lagos-time formatting)
 components/
-  ui/                      primitives: Button, Field, Card
+  ui/                      primitives: Button, Field, Card, PinInput, ChoiceGroup
+  confirm-step.tsx         review + PIN screen before any money moves
+  use-pin-action.ts        useActionState wrapper for PIN-confirmed forms
   icons.tsx                inline SVG icon set (no icon dependency)
   balance-card, quick-actions, account-strip, activity-feed, bottom-nav, app-header
   money-amount.tsx         the ONLY place money is rendered
@@ -78,9 +84,11 @@ proxy.ts                   Next 16 edge convention (was middleware.ts) — anon 
 5. **Components never touch Prisma.** Services map rows → `lib/view.ts` shapes.
 6. Gating: `(app)/layout.tsx` calls `requireUser()`. In an action use
    `getCurrentUser()` and return an error (don't redirect from an action).
-6a. **Sensitive actions** (moving money, security settings) go through the
-   step-up gate: `hasStepUp()` → else require the password, `verifyUserPassword`,
-   `grantStepUp()`. Trusted for `STEP_UP_MINUTES` (default 5).
+6a. **Sensitive actions** (moving money, loans) need the transaction PIN on
+   every submit: the schema takes `pin`, the action calls
+   `verifyTransactionPin(userId, pin)` and returns `fieldErrors.pin` on failure.
+   The UI uses `<ConfirmStep>` + `usePinAction`. The password is only for
+   signing in — and for changing/resetting the PIN.
 7. No `any`, no `dangerouslySetInnerHTML` (ESLint errors).
 8. Styling: token classes only (`bg-surface`, `text-ink-soft`, `border-line`,
    `text-accent`, `bg-card`…). Tokens in `app/globals.css`. No raw hex.

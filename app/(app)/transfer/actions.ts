@@ -1,8 +1,8 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { getCurrentUser, grantStepUp, hasStepUp } from "@/lib/session";
-import { verifyUserPassword } from "@/lib/services/auth-service";
+import { getCurrentUser } from "@/lib/session";
+import { verifyTransactionPin } from "@/lib/services/pin-service";
 import {
   lookupRecipient,
   submitExternalTransfer,
@@ -29,24 +29,6 @@ function bumpPaths() {
   revalidatePath("/activity");
 }
 
-/**
- * Step-up gate. Returns null when the sensitive action may proceed, or a
- * TransferState describing why not (missing / wrong password).
- */
-async function requireStepUp(
-  userId: string,
-  password: string | undefined,
-): Promise<TransferState | null> {
-  if (await hasStepUp()) return null;
-  if (!password) {
-    return { fieldErrors: { password: "Confirm with your password" } };
-  }
-  const ok = await verifyUserPassword(userId, password);
-  if (!ok) return { fieldErrors: { password: "Password is incorrect" } };
-  await grantStepUp();
-  return null;
-}
-
 export async function internalTransferAction(
   _prev: TransferState,
   formData: FormData,
@@ -57,8 +39,8 @@ export async function internalTransferAction(
   const parsed = internalTransferSchema.safeParse(Object.fromEntries(formData));
   if (!parsed.success) return { fieldErrors: firstFieldErrors(parsed.error) };
 
-  const gate = await requireStepUp(user.id, parsed.data.password);
-  if (gate) return gate;
+  const pin = await verifyTransactionPin(user.id, parsed.data.pin);
+  if (!pin.ok) return { fieldErrors: { pin: pin.error } };
 
   const result = await submitInternalTransfer(user.id, parsed.data);
   if (!result.ok) return { error: result.error };
@@ -77,8 +59,8 @@ export async function externalTransferAction(
   const parsed = externalTransferSchema.safeParse(Object.fromEntries(formData));
   if (!parsed.success) return { fieldErrors: firstFieldErrors(parsed.error) };
 
-  const gate = await requireStepUp(user.id, parsed.data.password);
-  if (gate) return gate;
+  const pin = await verifyTransactionPin(user.id, parsed.data.pin);
+  if (!pin.ok) return { fieldErrors: { pin: pin.error } };
 
   const result = await submitExternalTransfer(user.id, parsed.data);
   if (!result.ok) return { error: result.error };

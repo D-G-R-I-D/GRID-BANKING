@@ -58,7 +58,11 @@ export async function getReceipt(
       ? t.fromAccount.name
       : `${t.fromAccount.user.name} · ${t.fromAccount.name}`,
     toLabel: internal ? t.toAccount.name : t.toAccount.user.name,
-    toAccountNumber: internal ? null : t.toAccount.user.accountNumber,
+    // GRID's own house accounts (loans) have no number worth showing.
+    toAccountNumber:
+      internal || t.toAccount.user.isSystem
+        ? null
+        : t.toAccount.user.accountNumber,
     note: t.note,
     kind: internal ? "internal" : "external",
   };

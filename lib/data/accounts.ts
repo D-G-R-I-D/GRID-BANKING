@@ -1,6 +1,16 @@
 import "server-only";
 import { db } from "@/lib/db";
 
+/**
+ * GRID's lending house account, created by the pin_and_loans migration.
+ * Loans are paid out of it and repaid into it as ordinary transfers.
+ */
+export const LENDING_ACCOUNT_ID = "acct_grid_lending";
+
+export function findFlowAccount(userId: string) {
+  return db.account.findFirst({ where: { userId, kind: "FLOW" } });
+}
+
 export function listAccountsByUser(userId: string) {
   return db.account.findMany({
     where: { userId },

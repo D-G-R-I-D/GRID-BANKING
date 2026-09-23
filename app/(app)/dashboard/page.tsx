@@ -4,6 +4,7 @@ import { getDashboard } from "@/lib/services/dashboard-service";
 import { BalanceCard } from "@/components/balance-card";
 import { QuickActions } from "@/components/quick-actions";
 import { AccountStrip } from "@/components/account-strip";
+import { LoanCard } from "@/components/loan-card";
 import { ActivityFeed } from "@/components/activity-feed";
 import { AnnouncementCard } from "@/components/announcement-card";
 
@@ -34,6 +35,7 @@ export default async function DashboardPage() {
       <section className="rise rise-2 flex flex-col gap-2">
         <h2 className="text-sm font-medium text-ink-soft">Accounts</h2>
         <AccountStrip accounts={view.accounts} />
+        {view.loan && <LoanCard loan={view.loan} />}
       </section>
 
       <section className="rise rise-3 flex flex-col gap-2">

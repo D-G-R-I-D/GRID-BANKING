@@ -1,8 +1,9 @@
 "use client";
 
-import { useActionState, useEffect, useMemo, useState } from "react";
+import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/components/toast";
+import { usePinAction } from "@/components/use-pin-action";
 import type { TransferState } from "./actions";
 
 type Action = (
@@ -12,31 +13,19 @@ type Action = (
 
 const initial: TransferState = {};
 
-/** Shared compose → confirm → receipt flow for both transfer forms. */
+/** Shared compose → confirm (PIN) → receipt flow for both transfer forms. */
 export function useTransferFlow(action: Action) {
   const router = useRouter();
   const { toast } = useToast();
-  const [state, formAction, pending] = useActionState(action, initial);
-  const [confirming, setConfirming] = useState(false);
-  const idempotencyKey = useMemo(() => crypto.randomUUID(), []);
+  const flow = usePinAction(action, initial);
+  const { transferId } = flow.state;
 
   useEffect(() => {
-    if (state.transferId) {
+    if (transferId) {
       toast("Transfer successful");
-      router.push(`/transfer/receipt/${state.transferId}`);
-    } else if (state.error || state.fieldErrors?.password) {
-      // Re-read the page so a now-valid step-up drops the password field.
-      // (The user is already on the confirm step — that's where submit lives.)
-      router.refresh();
+      router.push(`/transfer/receipt/${transferId}`);
     }
-  }, [state, router, toast]);
+  }, [transferId, router, toast]);
 
-  return {
-    state,
-    formAction,
-    pending,
-    confirming,
-    setConfirming,
-    idempotencyKey,
-  };
+  return flow;
 }

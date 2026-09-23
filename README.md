@@ -26,7 +26,7 @@ cp .env.example .env
 #   • Docker:  docker compose up -d   (uses the .env.example default)
 #   • Neon:    free Postgres at neon.tech, paste its connection string
 npx prisma db push
-npm run db:seed                # demo@grid.bank / demo-password-123
+npm run db:seed                # demo@grid.bank / demo-password-123 · PIN 2580
 npm run dev                    # http://localhost:3000
 ```
 

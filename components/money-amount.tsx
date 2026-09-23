@@ -5,6 +5,8 @@ interface MoneyAmountProps {
   currency?: string;
   /** Show a +/- sign and colour for gains/losses. */
   signed?: boolean;
+  /** Take the colour from the parent (e.g. on the dark card). */
+  inherit?: boolean;
   className?: string;
 }
 
@@ -15,12 +17,14 @@ export function MoneyAmount({
   minorUnits,
   currency = DEFAULT_CURRENCY,
   signed = false,
+  inherit = false,
   className = "",
 }: MoneyAmountProps) {
   const formatted = formatMoney(Math.abs(minorUnits), currency);
   const sign = minorUnits < 0 ? "−" : signed ? "+" : "";
-  const tone =
-    signed && minorUnits !== 0
+  const tone = inherit
+    ? ""
+    : signed && minorUnits !== 0
       ? minorUnits > 0
         ? "text-positive"
         : "text-critical"
