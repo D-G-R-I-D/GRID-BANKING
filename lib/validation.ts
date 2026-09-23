@@ -101,3 +101,17 @@ export const loanRepaymentSchema = z.object({
   pin,
 });
 export type LoanRepaymentInput = z.infer<typeof loanRepaymentSchema>;
+
+// --- Airtime & data ----------------------------------------------------------
+// Only the shape is checked here; lib/topup.ts prices and validates the order.
+
+export const topUpSchema = z.object({
+  kind: z.enum(["airtime", "data"]),
+  network: z.string().min(1, "Choose a network"),
+  phone: z.string().trim(),
+  amount: z.string().optional(),
+  planId: z.string().optional(),
+  idempotencyKey: z.string().uuid(),
+  pin,
+});
+export type TopUpInput = z.infer<typeof topUpSchema>;

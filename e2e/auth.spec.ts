@@ -100,6 +100,26 @@ test("take a loan, then pay it off in full", async ({ page }) => {
   await expect(page.getByRole("heading", { name: "Past loans" })).toBeVisible();
 });
 
+test("buy airtime with the PIN and get a receipt", async ({ page }) => {
+  await signUp(page, "airtime");
+  await page.getByRole("link", { name: "Top up" }).click();
+  await expect(page).toHaveURL(/\/transfer\/topup$/);
+
+  await page.getByRole("button", { name: "MTN" }).click();
+  await page.getByPlaceholder("801 234 5678").fill("8031234567");
+  await page.getByRole("button", { name: "Continue" }).click();
+
+  await page.getByRole("button", { name: "₦500" }).click();
+  await page.getByRole("button", { name: "Continue" }).click();
+
+  await expect(page.getByText("Buy airtime")).toBeVisible();
+  await page.getByLabel("Transaction PIN").fill(PIN);
+  await page.getByRole("button", { name: /Pay ₦500/ }).click();
+
+  await expect(page).toHaveURL(/\/transfer\/receipt\//);
+  await expect(page.getByText("MTN airtime · 0803 123 4567")).toBeVisible();
+});
+
 test("protected routes redirect anonymous visitors", async ({ page }) => {
   await page.goto("/dashboard");
   await expect(page).toHaveURL(/\/sign-in$/);
