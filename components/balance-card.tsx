@@ -5,6 +5,7 @@ import { Check, Copy, Eye, EyeOff } from "@/components/icons";
 import { formatMoney } from "@/lib/money";
 import { copyText } from "@/lib/clipboard";
 import { useToast } from "@/components/toast";
+import { useCountUp } from "@/components/use-count-up";
 
 interface BalanceCardProps {
   balanceMinor: number;
@@ -18,6 +19,18 @@ function greeting(): string {
   if (h < 12) return "Good morning";
   if (h < 17) return "Good afternoon";
   return "Good evening";
+}
+
+/** Counts up from zero when revealed, then glides on every balance change. */
+function RevealedBalance({
+  balanceMinor,
+  currency,
+}: {
+  balanceMinor: number;
+  currency: string;
+}) {
+  const value = useCountUp(balanceMinor, 0);
+  return <>{formatMoney(value, currency)}</>;
 }
 
 function groupNumber(n: string): string {
@@ -87,7 +100,11 @@ export function BalanceCard({
         </button>
       </div>
       <p className="tnum mt-0.5 text-[2rem] leading-none">
-        {showBalance ? formatMoney(balanceMinor, currency) : "₦ ••••••"}
+        {showBalance ? (
+          <RevealedBalance balanceMinor={balanceMinor} currency={currency} />
+        ) : (
+          "₦ ••••••"
+        )}
       </p>
 
       <div className="mt-6 flex items-end justify-between">

@@ -1,14 +1,7 @@
 import "server-only";
 import { db } from "@/lib/db";
 
-/**
- * GRID's lending house account, created by the pin_and_loans migration.
- * Loans are paid out of it and repaid into it as ordinary transfers.
- */
-export const LENDING_ACCOUNT_ID = "acct_grid_lending";
-
-/** GRID's bill-payments house account (airtime, data). */
-export const BILLS_ACCOUNT_ID = "acct_grid_bills";
+export { BILLS_ACCOUNT_ID, LENDING_ACCOUNT_ID } from "@/lib/house-accounts";
 
 export function findFlowAccount(userId: string) {
   return db.account.findFirst({ where: { userId, kind: "FLOW" } });
@@ -31,5 +24,24 @@ export function createStarterAccounts(userId: string) {
       { userId, name: "Flow", kind: "FLOW", balanceMinor: 25_000_00 },
       { userId, name: "Vault", kind: "VAULT", balanceMinor: 0 },
     ],
+  });
+}
+
+/** Money in/out of these accounts since a date — for the cash-flow chart. */
+export function listTransferAmountsSince(accountIds: string[], since: Date) {
+  return db.transfer.findMany({
+    where: {
+      createdAt: { gte: since },
+      OR: [
+        { fromAccountId: { in: accountIds } },
+        { toAccountId: { in: accountIds } },
+      ],
+    },
+    select: {
+      fromAccountId: true,
+      toAccountId: true,
+      amountMinor: true,
+      createdAt: true,
+    },
   });
 }

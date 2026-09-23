@@ -5,6 +5,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useToast } from "@/components/toast";
 import { TopUpHeader } from "@/components/topup-header";
 import { NETWORKS } from "@/lib/topup-data";
+import { NetworkBadge } from "@/components/network-badge";
+import { cn } from "@/lib/cn";
 import { findNetwork, isTopUpPhone } from "@/lib/topup";
 
 export default function TopUpDetailsPage() {
@@ -106,7 +108,7 @@ export default function TopUpDetailsPage() {
         </div>
 
         {/* network grid */}
-        <div className="flex gap-3">
+        <div className="flex gap-2">
           {NETWORKS.map((n) => {
             const selected = network === n.id;
             return (
@@ -115,13 +117,21 @@ export default function TopUpDetailsPage() {
                 type="button"
                 onClick={() => setNetwork(n.id)}
                 aria-pressed={selected}
-                aria-label={n.name}
-                className={`grid h-12 w-12 place-items-center rounded-full text-center text-[10px] font-semibold leading-[1.1] ring-offset-2 ring-offset-paper transition-shadow ${
-                  selected ? "ring-2 ring-accent" : ""
-                }`}
-                style={{ backgroundColor: n.bg, color: n.fg }}
+                className="group flex flex-1 flex-col items-center gap-1.5 rounded-md py-1 text-xs text-ink-soft"
               >
-                {n.initials}
+                <span
+                  className={cn(
+                    "block rounded-full ring-offset-2 ring-offset-paper transition-[box-shadow,transform] group-active:scale-95",
+                    selected
+                      ? "ring-2 ring-accent"
+                      : "opacity-90 group-hover:opacity-100",
+                  )}
+                >
+                  <NetworkBadge network={n} className="block" />
+                </span>
+                <span className={selected ? "font-medium text-ink" : undefined}>
+                  {n.name}
+                </span>
               </button>
             );
           })}

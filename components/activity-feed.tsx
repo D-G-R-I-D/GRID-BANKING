@@ -1,7 +1,30 @@
 import Link from "next/link";
-import { ArrowDownLeft, ArrowUpRight } from "@/components/icons";
+import type { ComponentType } from "react";
+import {
+  ArrowDownLeft,
+  ArrowUpRight,
+  Coins,
+  Lock,
+  Phone,
+} from "@/components/icons";
 import { MoneyAmount } from "@/components/money-amount";
 import type { ActivityView } from "@/lib/view";
+
+type IconType = ComponentType<{ size?: number }>;
+
+/** A glyph per kind of movement, so the list scans at a glance. */
+function iconFor(item: ActivityView): IconType {
+  switch (item.kind) {
+    case "loan":
+      return Coins;
+    case "bills":
+      return Phone;
+    case "internal":
+      return Lock;
+    default:
+      return item.direction === "in" ? ArrowDownLeft : ArrowUpRight;
+  }
+}
 
 function groupLabel(date: Date): string {
   const today = new Date();
@@ -35,7 +58,7 @@ export function ActivityFeed({ items }: { items: ActivityView[] }) {
           <ul className="overflow-hidden rounded-md border border-line bg-surface">
             {group.map((item) => {
               const incoming = item.direction === "in";
-              const Icon = incoming ? ArrowDownLeft : ArrowUpRight;
+              const Icon = iconFor(item);
               return (
                 <li
                   key={item.id}

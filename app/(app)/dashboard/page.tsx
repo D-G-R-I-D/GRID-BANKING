@@ -5,6 +5,7 @@ import { BalanceCard } from "@/components/balance-card";
 import { QuickActions } from "@/components/quick-actions";
 import { AccountStrip } from "@/components/account-strip";
 import { LoanCard } from "@/components/loan-card";
+import { CashflowCard } from "@/components/cashflow-card";
 import { ActivityFeed } from "@/components/activity-feed";
 import { AnnouncementCard } from "@/components/announcement-card";
 
@@ -38,7 +39,11 @@ export default async function DashboardPage() {
         {view.loan && <LoanCard loan={view.loan} />}
       </section>
 
-      <section className="rise rise-3 flex flex-col gap-2">
+      <div className="rise rise-3">
+        <CashflowCard cashflow={view.cashflow} />
+      </div>
+
+      <section className="rise rise-4 flex flex-col gap-2">
         <div className="flex items-center justify-between">
           <h2 className="text-sm font-medium text-ink-soft">Recent activity</h2>
           <Link

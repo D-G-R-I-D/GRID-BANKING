@@ -61,3 +61,19 @@ export function findTransferWithPartiesById(id: string) {
     },
   });
 }
+
+/** Newest transfer paid to this user by another (real) person. */
+export function findLatestIncomingTransfer(userId: string) {
+  return db.transfer.findFirst({
+    where: {
+      toAccount: { userId },
+      fromAccount: { userId: { not: userId }, user: { isSystem: false } },
+    },
+    orderBy: { createdAt: "desc" },
+    select: {
+      id: true,
+      amountMinor: true,
+      fromAccount: { select: { user: { select: { name: true } } } },
+    },
+  });
+}
