@@ -7,6 +7,9 @@ import { db } from "@/lib/db";
  */
 export const LENDING_ACCOUNT_ID = "acct_grid_lending";
 
+/** GRID's bill-payments house account (airtime, data). */
+export const BILLS_ACCOUNT_ID = "acct_grid_bills";
+
 export function findFlowAccount(userId: string) {
   return db.account.findFirst({ where: { userId, kind: "FLOW" } });
 }

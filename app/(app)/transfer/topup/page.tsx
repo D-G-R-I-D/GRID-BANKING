@@ -1,20 +1,30 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useToast } from "@/components/toast";
 import { TopUpHeader } from "@/components/topup-header";
 import { NETWORKS } from "@/lib/topup-data";
+import { findNetwork, isTopUpPhone } from "@/lib/topup";
 
 export default function TopUpDetailsPage() {
   const router = useRouter();
   const { toast } = useToast();
 
-  const [type, setType] = useState<"airtime" | "data">("airtime");
-  const [network, setNetwork] = useState<string | null>(null);
-  const [phone, setPhone] = useState("");
+  // "Back" from later steps passes the choices along; start from them.
+  const params = useSearchParams();
+  const [type, setType] = useState<"airtime" | "data">(
+    params.get("type") === "data" ? "data" : "airtime",
+  );
+  const [network, setNetwork] = useState<string | null>(
+    findNetwork(params.get("network") ?? "") ? params.get("network") : null,
+  );
+  const [phone, setPhone] = useState(
+    (params.get("phone") ?? "").replace(/\D/g, "").slice(0, 10),
+  );
 
-  const canProceed = network !== null && phone.length >= 10;
+  const phoneValid = isTopUpPhone(phone);
+  const canProceed = network !== null && phoneValid;
 
   function handleContinue() {
     if (!canProceed) return;
@@ -25,7 +35,7 @@ export default function TopUpDetailsPage() {
   }
 
   return (
-    <div className="mx-auto flex min-h-dvh w-full max-w-md flex-col px-4 py-5">
+    <div className="flex flex-col">
       <TopUpHeader title="Local Airtime/Data" backHref="/dashboard" />
 
       <div className="flex flex-col gap-5">
@@ -34,6 +44,7 @@ export default function TopUpDetailsPage() {
           <button
             type="button"
             onClick={() => setType("airtime")}
+            aria-pressed={type === "airtime"}
             className={`flex-1 rounded-[4px] py-2 text-sm font-medium transition-colors ${
               type === "airtime"
                 ? "bg-paper text-ink shadow-sm"
@@ -45,6 +56,7 @@ export default function TopUpDetailsPage() {
           <button
             type="button"
             onClick={() => setType("data")}
+            aria-pressed={type === "data"}
             className={`flex-1 rounded-[4px] py-2 text-sm font-medium transition-colors ${
               type === "data" ? "bg-paper text-ink shadow-sm" : "text-ink-faint"
             }`}
@@ -81,6 +93,11 @@ export default function TopUpDetailsPage() {
               className="w-full bg-transparent text-sm text-ink outline-none placeholder:text-ink-faint"
             />
           </div>
+          {phone.length === 10 && !phoneValid && (
+            <span className="text-xs text-critical">
+              That doesn&rsquo;t look like a Nigerian mobile number
+            </span>
+          )}
           {phone.length > 0 && phone.length < 10 && (
             <span className="text-xs text-critical">
               Enter a valid 10-digit number
@@ -97,6 +114,7 @@ export default function TopUpDetailsPage() {
                 key={n.id}
                 type="button"
                 onClick={() => setNetwork(n.id)}
+                aria-pressed={selected}
                 aria-label={n.name}
                 className={`grid h-12 w-12 place-items-center rounded-full text-center text-[10px] font-semibold leading-[1.1] ring-offset-2 ring-offset-paper transition-shadow ${
                   selected ? "ring-2 ring-accent" : ""

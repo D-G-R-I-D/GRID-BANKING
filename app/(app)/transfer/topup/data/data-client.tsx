@@ -4,7 +4,8 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { formatMoney } from "@/lib/money";
 import { TopUpHeader } from "@/components/topup-header";
-import { DATA_PLANS, NETWORKS } from "@/lib/topup-data";
+import { Eye, EyeOff } from "@/components/icons";
+import { findNetwork, findPlan, formatLocalPhone } from "@/lib/topup";
 
 export function DataClient({
   phone,
@@ -20,8 +21,9 @@ export function DataClient({
   const router = useRouter();
   const [balanceHidden, setBalanceHidden] = useState(true);
 
-  const selectedPlan = DATA_PLANS.find((p) => p.id === planId);
-  const selectedNetwork = NETWORKS.find((n) => n.id === network);
+  // Only a bundle from the chosen network counts.
+  const selectedPlan = findPlan(network, planId);
+  const selectedNetwork = findNetwork(network);
   const planPriceMinor = selectedPlan ? selectedPlan.priceNaira * 100 : 0;
   const insufficientForPlan = !!selectedPlan && planPriceMinor > balanceMinor;
   const canProceed = !!selectedPlan && !insufficientForPlan;
@@ -44,7 +46,7 @@ export function DataClient({
   }
 
   return (
-    <div className="mx-auto flex min-h-dvh w-full max-w-md flex-col px-4 py-5">
+    <div className="flex flex-col">
       <TopUpHeader
         title="Buy Data"
         backHref={`/transfer/topup?type=data&network=${network}&phone=${phone}`}
@@ -62,7 +64,9 @@ export function DataClient({
             {selectedNetwork?.initials}
           </span>
           <div>
-            <p className="text-sm font-medium text-ink">+234 {phone}</p>
+            <p className="text-sm font-medium text-ink">
+              {formatLocalPhone(phone)}
+            </p>
             <p className="text-xs text-ink-faint">{selectedNetwork?.name}</p>
           </div>
         </div>
@@ -82,7 +86,7 @@ export function DataClient({
                 aria-label="Toggle balance visibility"
                 className="text-accent-ink/70 hover:text-accent-ink"
               >
-                {balanceHidden ? "👁" : "🙈"}
+                {balanceHidden ? <Eye size={16} /> : <EyeOff size={16} />}
               </button>
             </div>
           </div>

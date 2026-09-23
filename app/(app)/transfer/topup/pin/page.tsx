@@ -1,77 +1,48 @@
-"use client";
+import { redirect } from "next/navigation";
+import { requireUserWithPin } from "@/lib/session";
+import { getSpendableBalance } from "@/lib/services/topup-service";
+import { priceTopUp, type TopUpKind } from "@/lib/topup";
+import { TopUpConfirm } from "./top-up-confirm";
 
-import { useState, type FormEvent } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
-import { useToast } from "@/components/toast";
-import { TopUpHeader } from "@/components/topup-header";
+type Params = { [key: string]: string | string[] | undefined };
+const str = (v: string | string[] | undefined) =>
+  typeof v === "string" ? v : "";
 
-export default function TopUpPinPage() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const { toast } = useToast();
+/** Review + PIN. The order is re-priced here from the URL, never trusted. */
+export default async function TopUpConfirmPage({
+  searchParams,
+}: {
+  searchParams: Promise<Params>;
+}) {
+  const user = await requireUserWithPin();
+  const params = await searchParams;
+  const kind: TopUpKind = str(params.type) === "data" ? "data" : "airtime";
+  const raw = {
+    kind,
+    network: str(params.network),
+    phone: str(params.phone),
+    amount: str(params.amount),
+    planId: str(params.planId),
+  };
 
-  const type = searchParams.get("type") ?? "airtime";
-  const network = searchParams.get("network") ?? "";
-  const phone = searchParams.get("phone") ?? "";
-  const planId = searchParams.get("planId") ?? "";
-
-  const [pin, setPin] = useState("");
-  const [loading, setLoading] = useState(false);
-
-  const canProceed = pin.length === 4;
-
-  async function handlePurchase(e: FormEvent) {
-    e.preventDefault();
-    if (!canProceed) return;
-    setLoading(true);
-
-    // Simulate API call — replace with your real backend endpoint
-    await new Promise((r) => setTimeout(r, 1500));
-
-    setLoading(false);
-
-    const label = type === "airtime" ? "Airtime" : "Data";
-    toast(`${label} purchased successfully`);
-
-    const params = new URLSearchParams({ type });
-    router.push(`/transfer/topup/success?${params.toString()}`);
-  }
-
-  const backHref =
-    type === "airtime"
-      ? `/transfer/topup/amount?type=airtime&network=${network}&phone=${phone}`
-      : `/transfer/topup/data?network=${network}&phone=${phone}&planId=${planId}`;
+  const priced = priceTopUp(raw);
+  if (!priced.ok) redirect("/transfer/topup");
+  const { order } = priced;
 
   return (
-    <div className="mx-auto flex min-h-dvh w-full max-w-md flex-col px-4 py-5">
-      <TopUpHeader title="Enter your PIN" backHref={backHref} />
-
-      <form onSubmit={handlePurchase} className="flex flex-col gap-4">
-        <label className="flex flex-col gap-1.5">
-          <span className="text-xs font-medium text-ink-soft">
-            Enter your 4-digit PIN
-          </span>
-          <input
-            type="password"
-            inputMode="numeric"
-            maxLength={4}
-            value={pin}
-            onChange={(e) =>
-              setPin(e.target.value.replace(/\D/g, "").slice(0, 4))
-            }
-            className="w-full rounded-md border border-line bg-surface px-3 py-2.5 text-center text-lg tracking-[0.5em] text-ink outline-none focus-within:border-accent"
-            autoFocus
-          />
-        </label>
-
-        <button
-          type="submit"
-          disabled={!canProceed || loading}
-          className="rounded-md bg-accent px-4 py-2.5 text-sm font-medium text-accent-ink transition-opacity disabled:opacity-40"
-        >
-          {loading ? "Processing..." : "Confirm"}
-        </button>
-      </form>
-    </div>
+    <TopUpConfirm
+      raw={raw}
+      summary={{
+        kind: order.kind,
+        networkName: order.network.name,
+        phone: order.phone,
+        amountMinor: order.amountMinor,
+        planLabel: order.plan
+          ? `${order.plan.data} · ${order.plan.validity}`
+          : null,
+      }}
+      balanceMinor={await getSpendableBalance(user.id)}
+      pinLength={user.pinLength}
+    />
   );
 }

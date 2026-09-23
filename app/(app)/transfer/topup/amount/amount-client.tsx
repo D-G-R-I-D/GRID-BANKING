@@ -3,6 +3,11 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { formatMoney } from "@/lib/money";
+import {
+  AIRTIME_MIN_NAIRA,
+  airtimeAmountError,
+  formatLocalPhone,
+} from "@/lib/topup";
 import { TopUpHeader } from "@/components/topup-header";
 
 export function AmountClient({
@@ -17,11 +22,13 @@ export function AmountClient({
   const router = useRouter();
   const [amount, setAmount] = useState("");
 
-  const amountNaira = parseInt(amount, 10) || 0;
-  const amountMinor = amountNaira * 100;
-  const amountError = amountNaira > 0 && amountNaira < 50;
+  // Whole naira only; "10.5" is an error, not silently ₦10.
+  const amountNaira = /^\d+$/.test(amount) ? Number(amount) : null;
+  const amountMinor = (amountNaira ?? 0) * 100;
+  const amountError = amount === "" ? null : airtimeAmountError(amountNaira);
   const insufficientBalance = amountMinor > balanceMinor;
-  const canProceed = amountNaira >= 50 && !insufficientBalance;
+  const canProceed =
+    amount !== "" && amountError === null && !insufficientBalance;
 
   function handleContinue() {
     if (!canProceed) return;
@@ -35,7 +42,7 @@ export function AmountClient({
   }
 
   return (
-    <div className="mx-auto flex min-h-dvh w-full max-w-md flex-col px-4 py-5">
+    <div className="flex flex-col">
       <TopUpHeader
         title="Enter amount"
         backHref={`/transfer/topup?type=airtime&network=${network}&phone=${phone}`}
@@ -49,7 +56,7 @@ export function AmountClient({
         className="flex flex-col gap-4"
       >
         <div className="rounded-md border border-line bg-surface-sunk px-3 py-2 text-sm text-ink-soft">
-          To: +234 {phone}
+          To: {formatLocalPhone(phone)}
         </div>
 
         <label className="flex flex-col gap-1.5">
@@ -59,7 +66,7 @@ export function AmountClient({
             <input
               type="number"
               inputMode="numeric"
-              min={50}
+              min={AIRTIME_MIN_NAIRA}
               placeholder="0"
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
@@ -68,7 +75,7 @@ export function AmountClient({
             />
           </div>
           {amountError && (
-            <span className="text-xs text-critical">Minimum amount is ₦50</span>
+            <span className="text-xs text-critical">{amountError}</span>
           )}
           {insufficientBalance && (
             <span className="text-xs text-critical">

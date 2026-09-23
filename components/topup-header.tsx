@@ -13,6 +13,7 @@ function ArrowLeft({ size = 18 }: { size?: number }) {
       strokeWidth={1.8}
       strokeLinecap="round"
       strokeLinejoin="round"
+      aria-hidden="true"
     >
       <path d="m15 18-6-6 6-6" />
     </svg>
@@ -40,7 +41,7 @@ export function TopUpHeader({
       >
         <ArrowLeft size={18} />
       </button>
-      <h2 className="text-base font-semibold text-ink">{title}</h2>
+      <h1 className="text-xl">{title}</h1>
       {!hideClose && (
         <button
           type="button"

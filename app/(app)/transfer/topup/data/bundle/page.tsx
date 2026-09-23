@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { TopUpHeader } from "@/components/topup-header";
-import { DATA_PLANS } from "@/lib/topup-data";
+import { plansForNetwork } from "@/lib/topup";
 
 const FILTERS = ["All", "Daily", "Weekly", "Monthly"] as const;
 
@@ -15,10 +15,12 @@ export default function BundlePickerPage() {
 
   const [filter, setFilter] = useState<(typeof FILTERS)[number]>("All");
 
+  // Only bundles sold on the network the user picked.
+  const networkPlans = plansForNetwork(network);
   const filteredPlans =
     filter === "All"
-      ? DATA_PLANS
-      : DATA_PLANS.filter((p) => p.frequency === filter.toLowerCase());
+      ? networkPlans
+      : networkPlans.filter((p) => p.frequency === filter.toLowerCase());
 
   function selectPlan(planId: string) {
     const params = new URLSearchParams({ network, phone, planId });
@@ -26,7 +28,7 @@ export default function BundlePickerPage() {
   }
 
   return (
-    <div className="mx-auto flex min-h-dvh w-full max-w-md flex-col px-4 py-5">
+    <div className="flex flex-col">
       <TopUpHeader
         title="Select Data Bundle"
         backHref={`/transfer/topup/data?network=${network}&phone=${phone}`}
