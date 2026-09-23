@@ -1,13 +1,10 @@
-import { hasStepUp, requireUser } from "@/lib/session";
+import { requireUserWithPin } from "@/lib/session";
 import { getTransferTargets } from "@/lib/services/transfer-service";
 import { TransferTabs } from "./transfer-tabs";
 
 export default async function TransferPage() {
-  const user = await requireUser();
-  const [{ accounts }, stepUpActive] = await Promise.all([
-    getTransferTargets(user.id),
-    hasStepUp(),
-  ]);
+  const user = await requireUserWithPin();
+  const { accounts } = await getTransferTargets(user.id);
 
   return (
     <div className="flex flex-col gap-5">
@@ -17,7 +14,7 @@ export default async function TransferPage() {
           Between your accounts, or to any GRID account number.
         </p>
       </div>
-      <TransferTabs accounts={accounts} stepUpActive={stepUpActive} />
+      <TransferTabs accounts={accounts} pinLength={user.pinLength} />
     </div>
   );
 }

@@ -4,21 +4,18 @@ import { useState, useTransition } from "react";
 import { Check, Users } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { Field } from "@/components/ui/field";
+import { ConfirmStep } from "@/components/confirm-step";
 import { Spinner } from "@/components/ui/spinner";
 import { MoneyAmount } from "@/components/money-amount";
 import { parseAmountToMinor } from "@/lib/money";
 import type { RecipientView } from "@/lib/view";
 import { externalTransferAction, lookupRecipientAction } from "./actions";
 import { useTransferFlow } from "./use-transfer-flow";
-import { ConfirmStep } from "./confirm-step";
 
-export function ExternalTransferForm({
-  stepUpActive,
-}: {
-  stepUpActive: boolean;
-}) {
+export function ExternalTransferForm({ pinLength }: { pinLength: number }) {
   const {
     state,
+    pinKey,
     formAction,
     pending,
     confirming,
@@ -133,6 +130,7 @@ export function ExternalTransferForm({
 
       {confirming && recipient && (
         <ConfirmStep
+          title="Confirm this transfer"
           rows={[
             { label: "To", value: recipient.name },
             {
@@ -145,8 +143,9 @@ export function ExternalTransferForm({
             },
             ...(note ? [{ label: "Note", value: note }] : []),
           ]}
-          needsPassword={!stepUpActive}
-          passwordError={state.fieldErrors?.password}
+          pinLength={pinLength}
+          pinError={state.fieldErrors?.pin}
+          pinKey={pinKey}
           error={state.error}
           pending={pending}
           buttonLabel={`Send ₦${amount}`}

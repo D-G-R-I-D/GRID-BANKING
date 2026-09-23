@@ -10,10 +10,10 @@ type Tab = "internal" | "external";
 
 export function TransferTabs({
   accounts,
-  stepUpActive,
+  pinLength,
 }: {
   accounts: AccountView[];
-  stepUpActive: boolean;
+  pinLength: number;
 }) {
   const [tab, setTab] = useState<Tab>("internal");
 
@@ -53,9 +53,9 @@ export function TransferTabs({
       </div>
 
       {tab === "internal" ? (
-        <InternalTransferForm accounts={accounts} stepUpActive={stepUpActive} />
+        <InternalTransferForm accounts={accounts} pinLength={pinLength} />
       ) : (
-        <ExternalTransferForm stepUpActive={stepUpActive} />
+        <ExternalTransferForm pinLength={pinLength} />
       )}
     </div>
   );

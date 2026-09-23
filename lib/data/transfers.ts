@@ -43,7 +43,9 @@ export function findTransferWithPartiesById(id: string) {
           id: true,
           name: true,
           userId: true,
-          user: { select: { name: true, accountNumber: true } },
+          user: {
+            select: { name: true, accountNumber: true, isSystem: true },
+          },
         },
       },
       toAccount: {
@@ -51,7 +53,9 @@ export function findTransferWithPartiesById(id: string) {
           id: true,
           name: true,
           userId: true,
-          user: { select: { name: true, accountNumber: true } },
+          user: {
+            select: { name: true, accountNumber: true, isSystem: true },
+          },
         },
       },
     },

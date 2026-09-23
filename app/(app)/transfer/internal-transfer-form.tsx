@@ -4,23 +4,24 @@ import { useState } from "react";
 import { ArrowDown } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { Field } from "@/components/ui/field";
+import { ConfirmStep } from "@/components/confirm-step";
 import { MoneyAmount } from "@/components/money-amount";
 import { formatMoney, parseAmountToMinor } from "@/lib/money";
 import { cn } from "@/lib/cn";
 import type { AccountView } from "@/lib/view";
 import { internalTransferAction } from "./actions";
 import { useTransferFlow } from "./use-transfer-flow";
-import { ConfirmStep } from "./confirm-step";
 
 export function InternalTransferForm({
   accounts,
-  stepUpActive,
+  pinLength,
 }: {
   accounts: AccountView[];
-  stepUpActive: boolean;
+  pinLength: number;
 }) {
   const {
     state,
+    pinKey,
     formAction,
     pending,
     confirming,
@@ -120,6 +121,7 @@ export function InternalTransferForm({
 
       {confirming && (
         <ConfirmStep
+          title="Confirm this transfer"
           rows={[
             { label: "From", value: from?.name ?? "—" },
             { label: "To", value: to?.name ?? "—" },
@@ -134,8 +136,9 @@ export function InternalTransferForm({
             },
             ...(note ? [{ label: "Note", value: note }] : []),
           ]}
-          needsPassword={!stepUpActive}
-          passwordError={state.fieldErrors?.password}
+          pinLength={pinLength}
+          pinError={state.fieldErrors?.pin}
+          pinKey={pinKey}
           error={state.error}
           pending={pending}
           buttonLabel={`Move ₦${amount}`}

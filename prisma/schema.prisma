@@ -18,10 +18,20 @@ model User {
   name         String
   dateOfBirth  DateTime?
   passwordHash String
+  // Transaction PIN (4 or 6 digits, bcrypt-hashed). Null until the user sets
+  // one right after sign-up; the app shell won't let them past /set-pin.
+  pinHash           String?
+  pinLength         Int?
+  pinFailedAttempts Int       @default(0)
+  pinLockedUntil    DateTime?
+  // House accounts (e.g. the lending book) belong to a system user that can't
+  // sign in and can't be found as a transfer recipient.
+  isSystem     Boolean   @default(false)
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
 
   accounts Account[]
+  loans    Loan[]
 }
 
 enum AccountKind {
@@ -43,6 +53,7 @@ model Account {
 
   transfersOut Transfer[] @relation("transfersOut")
   transfersIn  Transfer[] @relation("transfersIn")
+  loans        Loan[]
 
   @@index([userId])
 }
@@ -60,6 +71,74 @@ model Transfer {
   idempotencyKey String   @unique
   createdAt      DateTime @default(now())
 
+  loanDisbursement Loan?
+  loanRepayment    LoanRepayment?
+
   @@index([fromAccountId, createdAt])
   @@index([toAccountId, createdAt])
+}
+
+// --- Loans ----------------------------------------------------------------
+// A loan's money moves as ordinary Transfers between the GRID lending house
+// account and the borrower's Flow account, so activity and receipts just work.
+
+enum LoanPlan {
+  INSTALLMENTS // equal monthly payments
+  SINGLE // one payment at the end of the term
+}
+
+enum LoanStatus {
+  ACTIVE
+  REPAID
+}
+
+model Loan {
+  id                     String     @id @default(cuid())
+  userId                 String
+  user                   User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  // The Flow account the loan was paid into (and is repaid from).
+  accountId              String
+  account                Account    @relation(fields: [accountId], references: [id])
+  principalMinor         Int
+  interestMinor          Int
+  totalMinor             Int // principal + interest
+  repaidMinor            Int        @default(0)
+  monthlyRateBps         Int // flat rate per month, in basis points
+  termMonths             Int
+  plan                   LoanPlan
+  status                 LoanStatus @default(ACTIVE)
+  disbursementTransferId String     @unique
+  disbursementTransfer   Transfer   @relation(fields: [disbursementTransferId], references: [id])
+  createdAt              DateTime   @default(now())
+  closedAt               DateTime?
+
+  installments LoanInstallment[]
+  repayments   LoanRepayment[]
+
+  @@index([userId, status])
+}
+
+model LoanInstallment {
+  id          String    @id @default(cuid())
+  loanId      String
+  loan        Loan      @relation(fields: [loanId], references: [id], onDelete: Cascade)
+  sequence    Int // 1-based
+  dueDate     DateTime
+  amountMinor Int
+  paidMinor   Int       @default(0)
+  paidAt      DateTime? // set when fully paid
+
+  @@unique([loanId, sequence])
+}
+
+model LoanRepayment {
+  id          String   @id @default(cuid())
+  loanId      String
+  loan        Loan     @relation(fields: [loanId], references: [id], onDelete: Cascade)
+  transferId  String   @unique
+  transfer    Transfer @relation(fields: [transferId], references: [id])
+  amountMinor Int
+  createdAt   DateTime @default(now())
+
+  @@index([loanId, createdAt])
 }

@@ -3,7 +3,14 @@ import { NextResponse, type NextRequest } from "next/server";
 import { sessionOptions, type SessionData } from "@/lib/session-config";
 import { checkExpiry } from "@/lib/session-policy";
 
-const PROTECTED = ["/dashboard", "/transfer", "/activity", "/settings"];
+const PROTECTED = [
+  "/dashboard",
+  "/transfer",
+  "/activity",
+  "/settings",
+  "/loans",
+  "/set-pin",
+];
 const REFRESH_EVERY_MS = 60_000; // don't re-seal the cookie on every request
 
 function signInRedirect(req: NextRequest, reason?: string) {
@@ -51,5 +58,7 @@ export const config = {
     "/transfer/:path*",
     "/activity/:path*",
     "/settings/:path*",
+    "/loans/:path*",
+    "/set-pin/:path*",
   ],
 };

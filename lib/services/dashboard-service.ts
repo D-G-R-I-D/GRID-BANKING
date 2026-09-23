@@ -2,6 +2,7 @@ import "server-only";
 import { firstName } from "@/lib/name";
 import { listAccountsByUser } from "@/lib/data/accounts";
 import { listTransfersForAccounts } from "@/lib/data/transfers";
+import { getLoanSnapshot } from "@/lib/services/loan-service";
 import { toAccountView, toActivityView } from "@/lib/services/mappers";
 import type { DashboardView } from "@/lib/view";
 
@@ -14,7 +15,10 @@ export async function getDashboard(
   userId: string,
   user: DashboardUser,
 ): Promise<DashboardView> {
-  const accounts = await listAccountsByUser(userId);
+  const [accounts, loan] = await Promise.all([
+    listAccountsByUser(userId),
+    getLoanSnapshot(userId),
+  ]);
   const owned = new Set(accounts.map((a) => a.id));
   const transfers = await listTransfersForAccounts([...owned], 6);
 
@@ -26,5 +30,6 @@ export async function getDashboard(
     totalMinor: accountViews.reduce((sum, a) => sum + a.balanceMinor, 0),
     accounts: accountViews,
     recentActivity: transfers.map((t) => toActivityView(t, owned)),
+    loan,
   };
 }

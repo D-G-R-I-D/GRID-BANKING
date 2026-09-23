@@ -3,33 +3,46 @@
 import type { ReactNode } from "react";
 import { Lock } from "@/components/icons";
 import { Button } from "@/components/ui/button";
-import { Field } from "@/components/ui/field";
+import { PinInput } from "@/components/ui/pin-input";
 
 export interface ConfirmRow {
   label: string;
   value: ReactNode;
 }
 
+/**
+ * The review screen before any money moves: what's about to happen, then
+ * the transaction PIN. Shared by transfers and loans.
+ */
 export function ConfirmStep({
+  title,
   rows,
-  needsPassword,
-  passwordError,
+  pinLength,
+  pinError,
+  pinKey,
   error,
   pending,
   buttonLabel,
+  pendingLabel = "Sending…",
+  footnote = "Encrypted · instant · no fee",
   onBack,
 }: {
+  title: string;
   rows: ConfirmRow[];
-  needsPassword: boolean;
-  passwordError?: string;
+  pinLength: number;
+  pinError?: string;
+  /** Change it to clear the PIN boxes (e.g. after each failed submit). */
+  pinKey?: number;
   error?: string;
   pending: boolean;
   buttonLabel: string;
+  pendingLabel?: string;
+  footnote?: string;
   onBack: () => void;
 }) {
   return (
     <div className="pop flex flex-col gap-4">
-      <p className="text-sm font-medium text-ink">Confirm this transfer</p>
+      <p className="text-sm font-medium text-ink">{title}</p>
 
       <dl className="divide-y divide-line rounded-lg border border-line bg-surface">
         {rows.map((r) => (
@@ -43,17 +56,15 @@ export function ConfirmStep({
         ))}
       </dl>
 
-      {needsPassword && (
-        <Field
-          label="Your password"
-          name="password"
-          type="password"
-          autoComplete="current-password"
-          required
-          hint="Confirm it's you before we send."
-          error={passwordError}
-        />
-      )}
+      <PinInput
+        key={pinKey}
+        length={pinLength}
+        name="pin"
+        label="Transaction PIN"
+        hint="Enter your PIN to authorise this."
+        error={pinError}
+        autoFocus
+      />
 
       {error && (
         <p role="alert" className="text-sm text-critical">
@@ -71,12 +82,12 @@ export function ConfirmStep({
           Edit
         </Button>
         <Button type="submit" pending={pending} className="flex-1">
-          {pending ? "Sending…" : buttonLabel}
+          {pending ? pendingLabel : buttonLabel}
         </Button>
       </div>
 
       <p className="flex items-center justify-center gap-1.5 text-xs text-ink-faint">
-        <Lock size={12} /> Encrypted · instant · no fee
+        <Lock size={12} /> {footnote}
       </p>
     </div>
   );

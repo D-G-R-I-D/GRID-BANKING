@@ -19,5 +19,6 @@ export async function signUpAction(
   if (!result.ok) return { error: result.error };
 
   await startSession(result.userId);
-  redirect("/dashboard");
+  // A transaction PIN is mandatory before the app opens up.
+  redirect("/set-pin");
 }

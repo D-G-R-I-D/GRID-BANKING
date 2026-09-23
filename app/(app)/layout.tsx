@@ -1,4 +1,4 @@
-import { requireUser } from "@/lib/session";
+import { requireUserWithPin } from "@/lib/session";
 import { initials } from "@/lib/name";
 import { AppHeader } from "@/components/app-header";
 import { BottomNav } from "@/components/bottom-nav";
@@ -11,7 +11,8 @@ export default async function AppLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const user = await requireUser();
+  // No PIN yet (new sign-up, or an account from before PINs) -> /set-pin.
+  const user = await requireUserWithPin();
 
   return (
     <ToastProvider>

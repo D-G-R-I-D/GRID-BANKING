@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { ComponentType } from "react";
-import { ArrowUpRight, Lock, Plus, Sparkle } from "@/components/icons";
+import { ArrowUpRight, Coins, Lock, Plus } from "@/components/icons";
 
 type IconType = ComponentType<{ size?: number; className?: string }>;
 
@@ -8,7 +8,7 @@ const actions: { href: string; label: string; icon: IconType }[] = [
   { href: "/transfer", label: "Send", icon: ArrowUpRight },
   { href: "/transfer?to=vault", label: "To Vault", icon: Lock },
   { href: "/dashboard", label: "Top up", icon: Plus },
-  { href: "/dashboard", label: "Plan", icon: Sparkle },
+  { href: "/loans", label: "Loans", icon: Coins },
 ];
 
 export function QuickActions() {

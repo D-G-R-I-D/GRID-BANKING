@@ -4,7 +4,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { cache } from "react";
 import { findUserById } from "@/lib/data/users";
-import { checkExpiry, stepUpIsValid } from "@/lib/session-policy";
+import { checkExpiry } from "@/lib/session-policy";
 import { sessionOptions, type SessionData } from "@/lib/session-config";
 
 export type { SessionData } from "@/lib/session-config";
@@ -16,6 +16,8 @@ export interface CurrentUser {
   email: string;
   phone: string;
   accountNumber: string;
+  /** Length of their transaction PIN, or null if they haven't set one yet. */
+  pinLength: number | null;
 }
 
 export async function getSession() {
@@ -37,19 +39,6 @@ export async function endSession() {
   session.destroy();
 }
 
-/** Record that the user just re-entered their password. */
-export async function grantStepUp() {
-  const session = await getSession();
-  session.stepUpAt = Date.now();
-  await session.save();
-}
-
-/** True if a recent password confirmation is still trusted. */
-export async function hasStepUp(): Promise<boolean> {
-  const session = await getSession();
-  return stepUpIsValid(session.stepUpAt);
-}
-
 /**
  * Current user (safe fields only) or null. Cached per request.
  * Enforces the session timers read-only — the proxy does the cookie
@@ -68,6 +57,7 @@ export const getCurrentUser = cache(async (): Promise<CurrentUser | null> => {
     email: user.email,
     phone: user.phone,
     accountNumber: user.accountNumber,
+    pinLength: user.pinHash ? user.pinLength : null,
   };
 });
 
@@ -76,4 +66,17 @@ export async function requireUser(): Promise<CurrentUser> {
   const user = await getCurrentUser();
   if (!user) redirect("/sign-in");
   return user;
+}
+
+/**
+ * Gate for the app proper: signed in AND has a transaction PIN. Anyone
+ * without one (a new sign-up, or an account from before PINs) is sent to
+ * set one first — it's mandatory.
+ */
+export async function requireUserWithPin(): Promise<
+  CurrentUser & { pinLength: number }
+> {
+  const user = await requireUser();
+  if (user.pinLength === null) redirect("/set-pin");
+  return { ...user, pinLength: user.pinLength };
 }
