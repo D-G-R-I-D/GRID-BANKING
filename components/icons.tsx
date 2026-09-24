@@ -167,3 +167,10 @@ export const Coins = (p: IconProps) => (
     <path d="m16.71 13.88.7.71-2.82 2.82" />
   </Icon>
 );
+
+export const Phone = (p: IconProps) => (
+  <Icon {...p}>
+    <rect x="6" y="2" width="12" height="20" rx="2.5" />
+    <path d="M11 18h2" />
+  </Icon>
+);

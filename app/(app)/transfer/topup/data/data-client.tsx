@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { formatMoney } from "@/lib/money";
 import { TopUpHeader } from "@/components/topup-header";
+import { NetworkBadge } from "@/components/network-badge";
 import { Eye, EyeOff } from "@/components/icons";
 import { findNetwork, findPlan, formatLocalPhone } from "@/lib/topup";
 
@@ -54,15 +55,9 @@ export function DataClient({
 
       <div className="flex flex-col gap-5">
         <div className="flex items-center gap-3 rounded-md border border-line bg-surface px-3 py-3">
-          <span
-            className="grid h-9 w-9 place-items-center rounded-full text-center text-[9px] font-semibold leading-[1.1]"
-            style={{
-              backgroundColor: selectedNetwork?.bg,
-              color: selectedNetwork?.fg,
-            }}
-          >
-            {selectedNetwork?.initials}
-          </span>
+          {selectedNetwork && (
+            <NetworkBadge network={selectedNetwork} size={36} />
+          )}
           <div>
             <p className="text-sm font-medium text-ink">
               {formatLocalPhone(phone)}

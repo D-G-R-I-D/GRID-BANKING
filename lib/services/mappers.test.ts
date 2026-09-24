@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { TransferWithParties } from "@/lib/data/transfers";
+import { BILLS_ACCOUNT_ID, LENDING_ACCOUNT_ID } from "@/lib/house-accounts";
 import { toActivityView } from "./mappers";
 
 function makeTransfer(
@@ -26,6 +27,7 @@ describe("toActivityView", () => {
     expect(view.direction).toBe("out");
     expect(view.amountMinor).toBe(-5000);
     expect(view.counterparty).toBe("Vault");
+    expect(view.kind).toBe("internal");
   });
 
   it("outgoing to someone else: shows the recipient's name", () => {
@@ -36,6 +38,7 @@ describe("toActivityView", () => {
     const view = toActivityView(t, new Set(["flow-a"]));
     expect(view.direction).toBe("out");
     expect(view.counterparty).toBe("Bem");
+    expect(view.kind).toBe("transfer");
   });
 
   it("incoming from someone else: shows the sender's name", () => {
@@ -47,5 +50,29 @@ describe("toActivityView", () => {
     expect(view.direction).toBe("in");
     expect(view.amountMinor).toBe(5000);
     expect(view.counterparty).toBe("Bem");
+  });
+
+  it("tags loan and bill movements by their house account", () => {
+    const loan = makeTransfer({
+      fromAccountId: LENDING_ACCOUNT_ID,
+      fromAccount: {
+        id: LENDING_ACCOUNT_ID,
+        name: "Lending",
+        user: { name: "GRID Loans" },
+      },
+      toAccountId: "flow-a",
+      toAccount: { id: "flow-a", name: "Flow", user: { name: "Ada" } },
+    });
+    expect(toActivityView(loan, new Set(["flow-a"])).kind).toBe("loan");
+
+    const airtime = makeTransfer({
+      toAccountId: BILLS_ACCOUNT_ID,
+      toAccount: {
+        id: BILLS_ACCOUNT_ID,
+        name: "Bills",
+        user: { name: "GRID Bills" },
+      },
+    });
+    expect(toActivityView(airtime, new Set(["flow-a"])).kind).toBe("bills");
   });
 });

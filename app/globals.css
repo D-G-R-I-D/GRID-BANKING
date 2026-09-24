@@ -36,6 +36,9 @@
   --r-lg: 1.25rem;
   --shadow-sm: 0 1px 2px rgb(16 16 12 / 0.05);
   --shadow-md: 0 8px 30px -14px rgb(16 16 12 / 0.22);
+  /* Chart series (validated with the dataviz palette checker: CVD + contrast). */
+  --viz-in: #6366d9;
+  --viz-out: #eb6834;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -58,6 +61,8 @@
     --card-ink-soft: #a3a4b8;
     --card-line: #33344a;
     --shadow-md: 0 8px 30px -14px rgb(0 0 0 / 0.6);
+    --viz-in: #7c7fe6;
+    --viz-out: #d95926;
   }
 }
 
@@ -80,9 +85,13 @@
   --card-ink-soft: #a3a4b8;
   --card-line: #33344a;
   --shadow-md: 0 8px 30px -14px rgb(0 0 0 / 0.6);
+  --viz-in: #7c7fe6;
+  --viz-out: #d95926;
 }
 
 @theme inline {
+  --color-viz-in: var(--viz-in);
+  --color-viz-out: var(--viz-out);
   --color-paper: var(--paper);
   --color-surface: var(--surface);
   --color-surface-sunk: var(--surface-sunk);

@@ -21,6 +21,22 @@ export interface ActivityView {
   currency: string;
   counterparty: string;
   direction: "in" | "out";
+  /** What sort of movement, for the icon: a person, your Vault, a loan, a bill. */
+  kind: ActivityKind;
+}
+
+export type ActivityKind = "transfer" | "internal" | "loan" | "bills";
+
+export interface CashflowWeekView {
+  weekStart: Date;
+  inMinor: number;
+  outMinor: number;
+}
+
+export interface CashflowView {
+  weeks: CashflowWeekView[];
+  inMinor: number;
+  outMinor: number;
 }
 
 export interface DashboardView {
@@ -31,6 +47,7 @@ export interface DashboardView {
   accounts: AccountView[];
   recentActivity: ActivityView[];
   loan: LoanSnapshotView | null;
+  cashflow: CashflowView;
 }
 
 export interface TransferTargetsView {
@@ -107,4 +124,11 @@ export interface LoansView {
 export interface LoanSnapshotView {
   outstandingMinor: number;
   nextDue: NextDueView | null;
+}
+
+/** The most recent money someone else sent this user (for the live toast). */
+export interface IncomingView {
+  id: string;
+  amountMinor: number;
+  from: string;
 }

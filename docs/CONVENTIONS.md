@@ -63,6 +63,13 @@ lib/
 components/
   ui/                      primitives: Button, Field, Card, PinInput, ChoiceGroup
   confirm-step.tsx         review + PIN screen before any money moves
+  live-updates.tsx         router.refresh() every 15s while active + on tab return;
+                           toasts new incoming money. Stops after 2 min idle so the
+                           session idle timeout still works
+  cashflow-card.tsx        weekly in/out chart; colours are --viz-in / --viz-out
+                           (validated pair — don't swap for other hexes)
+  network-badge.tsx        MTN/Airtel/Glo/9mobile marks; set NETWORKS[].logo to use
+                           an official file from public/networks/
   use-pin-action.ts        useActionState wrapper for PIN-confirmed forms
   icons.tsx                inline SVG icon set (no icon dependency)
   balance-card, quick-actions, account-strip, activity-feed, bottom-nav, app-header

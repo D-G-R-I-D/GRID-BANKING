@@ -154,7 +154,19 @@ export const DATA_PLANS: DataPlan[] = [
   },
 ];
 
-export const NETWORKS = [
+/**
+ * Mobile networks. `bg`/`fg` are each network's brand colours (data, not
+ * theme). To use an official logo instead of the drawn badge, put the file in
+ * public/networks/ and set `logo`, e.g. logo: "/networks/mtn.svg".
+ */
+export const NETWORKS: {
+  id: string;
+  name: string;
+  initials: string;
+  bg: string;
+  fg: string;
+  logo?: string;
+}[] = [
   { id: "mtn", name: "MTN", initials: "MTN", bg: "#FFCC08", fg: "#000000" },
   {
     id: "airtel",

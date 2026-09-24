@@ -1,6 +1,6 @@
 import { requireUser } from "@/lib/session";
 import { getActivity } from "@/lib/services/activity-service";
-import { ActivityFeed } from "@/components/activity-feed";
+import { ActivityFilters } from "./activity-filters";
 
 export default async function ActivityPage() {
   const user = await requireUser();
@@ -9,7 +9,7 @@ export default async function ActivityPage() {
   return (
     <div className="flex flex-col gap-4">
       <h1 className="text-xl">Activity</h1>
-      <ActivityFeed items={items} />
+      <ActivityFilters items={items} />
     </div>
   );
 }

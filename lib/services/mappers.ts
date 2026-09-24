@@ -1,6 +1,7 @@
 import type { Account } from "@prisma/client";
 import type { TransferWithParties } from "@/lib/data/transfers";
-import type { AccountView, ActivityView } from "@/lib/view";
+import { BILLS_ACCOUNT_ID, LENDING_ACCOUNT_ID } from "@/lib/house-accounts";
+import type { AccountView, ActivityKind, ActivityView } from "@/lib/view";
 
 export function toAccountView(account: Account): AccountView {
   return {
@@ -31,5 +32,16 @@ export function toActivityView(
     // Between my own accounts -> the account name ("Vault").
     // To/from someone else -> that person's name.
     counterparty: otherIsMine ? other.name : other.user.name,
+    kind: activityKind(other.id, otherIsMine),
   };
+}
+
+function activityKind(
+  otherAccountId: string,
+  otherIsMine: boolean,
+): ActivityKind {
+  if (otherIsMine) return "internal";
+  if (otherAccountId === LENDING_ACCOUNT_ID) return "loan";
+  if (otherAccountId === BILLS_ACCOUNT_ID) return "bills";
+  return "transfer";
 }
