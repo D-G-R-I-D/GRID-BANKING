@@ -7,7 +7,7 @@ type IconType = ComponentType<{ size?: number; className?: string }>;
 const actions: { href: string; label: string; icon: IconType }[] = [
   { href: "/transfer", label: "Send", icon: ArrowUpRight },
   { href: "/transfer?to=vault", label: "To Vault", icon: Lock },
-  { href: "/dashboard", label: "Top up", icon: Plus },
+  { href: "/transfer/topup", label: "Top up", icon: Plus },
   { href: "/loans", label: "Loans", icon: Coins },
 ];
 
