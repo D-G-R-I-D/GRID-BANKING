@@ -7,7 +7,7 @@ type IconType = ComponentType<{ size?: number; className?: string }>;
 const actions: { href: string; label: string; icon: IconType }[] = [
   { href: "/transfer", label: "Send", icon: ArrowUpRight },
   { href: "/transfer?to=vault", label: "To Vault", icon: Lock },
-  { href: "/dashboard", label: "Top up", icon: Plus },
+  { href: "/transfer/topup", label: "Top up", icon: Plus },
   { href: "/dashboard", label: "Plan", icon: Sparkle },
 ];
 
@@ -21,9 +21,7 @@ export function QuickActions() {
           className="flex flex-col items-center gap-2 rounded-md border border-line bg-surface p-3 text-center transition-colors hover:bg-surface-sunk active:scale-[0.98]"
         >
           <Icon size={18} className="text-accent" />
-          <span className="text-[0.7rem] leading-tight text-ink-soft">
-            {label}
-          </span>
+          <span className="text-[0.7rem] leading-tight text-ink-soft">{label}</span>
         </Link>
       ))}
     </div>

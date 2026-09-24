@@ -26,8 +26,8 @@ export default async function DashboardPage() {
       </div>
 
       <div className="rise rise-1">
-        <QuickActions />
-      </div>
+  <QuickActions/>
+</div>
 
       <AnnouncementCard />
 
