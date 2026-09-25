@@ -24,6 +24,14 @@ model User {
   pinLength         Int?
   pinFailedAttempts Int       @default(0)
   pinLockedUntil    DateTime?
+  // Identity (optional). The full BVN/NIN is never stored: only a keyed
+  // hash (so one number can't back two accounts) and the last 4 digits for
+  // display. Not verified against NIBSS/NIMC — format-checked only.
+  bvnHash         String?   @unique
+  bvnLast4        String?
+  ninHash         String?   @unique
+  ninLast4        String?
+  kycSnoozedUntil DateTime? // "Not now" on the identity prompt
   // House accounts (e.g. the lending book) belong to a system user that can't
   // sign in and can't be found as a transfer recipient.
   isSystem     Boolean   @default(false)

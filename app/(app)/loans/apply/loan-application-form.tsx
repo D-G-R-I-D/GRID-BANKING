@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { ChoiceGroup } from "@/components/ui/choice-group";
@@ -24,7 +25,15 @@ import { applyForLoanAction, type LoanState } from "../actions";
 const initial: LoanState = {};
 const ratePct = `${MONTHLY_RATE_BPS / 100}%`;
 
-export function LoanApplicationForm({ pinLength }: { pinLength: number }) {
+export function LoanApplicationForm({
+  pinLength,
+  maxMinor,
+  canRaiseLimit,
+}: {
+  pinLength: number;
+  maxMinor: number;
+  canRaiseLimit: boolean;
+}) {
   const router = useRouter();
   const { toast } = useToast();
   const {
@@ -44,7 +53,8 @@ export function LoanApplicationForm({ pinLength }: { pinLength: number }) {
 
   const principalMinor = parseAmountToMinor(amount);
   const quote =
-    loanAmountError(principalMinor) === null && principalMinor !== null
+    loanAmountError(principalMinor, maxMinor) === null &&
+    principalMinor !== null
       ? quoteLoan(principalMinor, term, plan)
       : null;
   const monthly = plan === "INSTALLMENTS" && term > 1;
@@ -58,7 +68,7 @@ export function LoanApplicationForm({ pinLength }: { pinLength: number }) {
   }, [state.loanId, router, toast]);
 
   function toReview() {
-    const err = loanAmountError(principalMinor);
+    const err = loanAmountError(principalMinor, maxMinor);
     if (err) {
       setAmountError(err);
       return;
@@ -86,7 +96,23 @@ export function LoanApplicationForm({ pinLength }: { pinLength: number }) {
           prefix="₦"
           value={amount}
           onChange={(e) => setAmount(e.target.value)}
-          hint="From ₦5,000 to ₦500,000."
+          hint={
+            <>
+              From ₦5,000 to {formatMoney(maxMinor)}.
+              {canRaiseLimit && (
+                <>
+                  {" "}
+                  <Link
+                    href="/settings/identity"
+                    className="text-accent underline"
+                  >
+                    Add BVN &amp; NIN
+                  </Link>{" "}
+                  to borrow up to ₦2,000,000.
+                </>
+              )}
+            </>
+          }
           error={amountError}
         />
 

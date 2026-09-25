@@ -12,6 +12,7 @@ import {
 import { parseAmountToMinor } from "@/lib/money";
 import { transferReference } from "@/lib/reference";
 import { findFlowAccount, LENDING_ACCOUNT_ID } from "@/lib/data/accounts";
+import { getIdentity } from "@/lib/services/identity-service";
 import {
   findActiveLoan,
   findLoanIdByTransferKey,
@@ -109,7 +110,8 @@ export async function applyForLoan(
   input: LoanApplicationInput,
 ): Promise<LoanResult> {
   const principalMinor = parseAmountToMinor(input.amount);
-  const amountError = loanAmountError(principalMinor);
+  const { loanLimitMinor } = await getIdentity(userId);
+  const amountError = loanAmountError(principalMinor, loanLimitMinor);
   if (amountError || principalMinor === null) {
     return { ok: false, error: amountError ?? "Enter a valid amount" };
   }

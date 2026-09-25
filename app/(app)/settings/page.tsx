@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { requireUserWithPin } from "@/lib/session";
 import { toProfileView } from "@/lib/services/profile-service";
+import { getIdentity } from "@/lib/services/identity-service";
 import { signOutAction } from "@/app/(app)/actions";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/theme-toggle";
@@ -8,6 +9,7 @@ import { ThemeToggle } from "@/components/theme-toggle";
 export default async function SettingsPage() {
   const user = await requireUserWithPin();
   const profile = toProfileView(user);
+  const identity = await getIdentity(user.id);
 
   const rows: { label: string; value: string }[] = [
     { label: "Name", value: profile.name },
@@ -42,6 +44,28 @@ export default async function SettingsPage() {
           <span className="text-sm text-ink-soft">
             {user.pinLength} digits ·{" "}
             <span className="text-accent">Change</span>
+          </span>
+        </Link>
+      </div>
+
+      <div className="flex flex-col gap-2">
+        <p className="text-sm font-medium text-ink">Identity</p>
+        <Link
+          href="/settings/identity"
+          className="flex items-center justify-between gap-4 rounded-md border border-line bg-surface px-4 py-3 transition-colors hover:bg-surface-sunk"
+        >
+          <span className="text-sm text-ink">BVN &amp; NIN</span>
+          <span className="text-right text-sm text-ink-soft">
+            {identity.complete ? (
+              "Added"
+            ) : (
+              <>
+                {identity.bvnLast4 || identity.ninLast4
+                  ? "1 of 2 added"
+                  : "Not added"}{" "}
+                · <span className="text-accent">Add</span>
+              </>
+            )}
           </span>
         </Link>
       </div>

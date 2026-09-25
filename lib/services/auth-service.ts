@@ -1,10 +1,12 @@
 import "server-only";
 import { hashPassword, verifyPassword } from "@/lib/auth";
+import { parseLoginIdentifier } from "@/lib/login";
 import { accountNumberFromPhone, normalizePhone } from "@/lib/phone";
 import { createStarterAccounts } from "@/lib/data/accounts";
 import {
   createUser,
   findUserById,
+  findUserByAccountNumber,
   findUserByEmail,
   findUserByEmailOrPhone,
 } from "@/lib/data/users";
@@ -38,12 +40,20 @@ export async function register(input: SignUpInput): Promise<RegisterResult> {
   return { ok: true, userId: user.id };
 }
 
-/** Returns the user id on success, null otherwise (generic — no enumeration). */
+/**
+ * Sign in with an email or an account number (lib/login.ts). Returns the user
+ * id on success, null otherwise (generic — no enumeration).
+ */
 export async function authenticate(
-  email: string,
+  identifier: string,
   password: string,
 ): Promise<string | null> {
-  const user = await findUserByEmail(email);
+  const id = parseLoginIdentifier(identifier);
+  const user = !id
+    ? null
+    : id.kind === "email"
+      ? await findUserByEmail(id.email)
+      : await findUserByAccountNumber(id.accountNumber);
   const ok = user ? await verifyPassword(password, user.passwordHash) : false;
   return user && ok ? user.id : null;
 }

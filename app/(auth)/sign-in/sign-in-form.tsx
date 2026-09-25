@@ -28,12 +28,15 @@ export function SignInForm({ notice }: { notice?: string }) {
 
       <form action={action} className="mt-8 flex flex-col gap-4">
         <Field
-          label="Email"
-          name="email"
-          type="email"
-          autoComplete="email"
+          label="Email or account number"
+          name="identifier"
+          type="text"
+          autoComplete="username"
+          autoCapitalize="none"
+          spellCheck={false}
           required
-          error={state.fieldErrors?.email}
+          hint="Your account number is your phone number without the 0."
+          error={state.fieldErrors?.identifier}
         />
         <Field
           label="Password"

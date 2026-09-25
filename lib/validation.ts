@@ -17,8 +17,9 @@ export const signUpSchema = z.object({
 });
 export type SignUpInput = z.infer<typeof signUpSchema>;
 
+// Email or account number (or the phone number it came from): lib/login.ts.
 export const signInSchema = z.object({
-  email: z.string().trim().toLowerCase().email("Enter a valid email"),
+  identifier: z.string().trim().min(1, "Enter your email or account number"),
   password: z.string().min(1, "Enter your password"),
 });
 export type SignInInput = z.infer<typeof signInSchema>;
@@ -115,3 +116,22 @@ export const topUpSchema = z.object({
   pin,
 });
 export type TopUpInput = z.infer<typeof topUpSchema>;
+
+// --- Identity (BVN / NIN) ---------------------------------------------------------
+// Both optional; blank means "leave as it is". At least one must be given.
+
+const identityNumber = (label: string) =>
+  z
+    .string()
+    .trim()
+    .transform((v) => v.replace(/\s/g, ""))
+    .refine((v) => v === "" || /^\d{11}$/.test(v), `${label} is 11 digits`)
+    .transform((v) => v || undefined);
+
+export const identitySchema = z
+  .object({ bvn: identityNumber("BVN"), nin: identityNumber("NIN"), pin })
+  .refine((v) => v.bvn || v.nin, {
+    message: "Enter your BVN, your NIN, or both",
+    path: ["bvn"],
+  });
+export type IdentityInput = z.infer<typeof identitySchema>;

@@ -1,4 +1,5 @@
 import "server-only";
+import type { Prisma } from "@prisma/client";
 import { db } from "@/lib/db";
 
 /** Data-access for the User table. Returns Prisma rows; callers map to views. */
@@ -9,6 +10,11 @@ export function findUserById(id: string) {
 
 export function findUserByEmail(email: string) {
   return db.user.findUnique({ where: { email, isSystem: false } });
+}
+
+/** Sign-in by account number (never a GRID house account). */
+export function findUserByAccountNumber(accountNumber: string) {
+  return db.user.findUnique({ where: { accountNumber, isSystem: false } });
 }
 
 export function findUserByEmailOrPhone(email: string, phone: string) {
@@ -86,4 +92,21 @@ export function clearPinAttempts(id: string) {
     where: { id },
     data: { pinFailedAttempts: 0, pinLockedUntil: null },
   });
+}
+
+// --- Identity (BVN / NIN) ---------------------------------------------------------
+
+export function findUserIdentity(id: string) {
+  return db.user.findUnique({
+    where: { id },
+    select: { bvnLast4: true, ninLast4: true, kycSnoozedUntil: true },
+  });
+}
+
+export function updateUserIdentity(id: string, data: Prisma.UserUpdateInput) {
+  return db.user.update({ where: { id }, data });
+}
+
+export function snoozeIdentityPrompt(id: string, until: Date) {
+  return db.user.update({ where: { id }, data: { kycSnoozedUntil: until } });
 }
