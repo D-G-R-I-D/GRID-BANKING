@@ -20,17 +20,23 @@ const securityHeaders = [
 // assets and Server Actions (sign-in, transfers…) from unknown origins, which
 // shows up as dead buttons and failed sign-ins. Allow private networks and
 // common tunnel domains — in development only; production keeps the strict
-// same-origin check.
+// same-origin check. In these patterns `*` is exactly one domain label and
+// `**` is any number of them, which tunnel hosts need.
 const isDev = process.env.NODE_ENV !== "production";
 const demoOrigins = [
   "192.168.*.*", // home / office Wi-Fi
   "10.*.*.*",
   "172.*.*.*", // incl. phone hotspots (172.20.10.x)
-  "*.devtunnels.ms", // VS Code "Forward a Port"
-  "*.ngrok-free.app",
-  "*.ngrok.app",
-  "*.trycloudflare.com",
-  "*.loca.lt",
+  "**.devtunnels.ms", // VS Code "Forward a Port" (abc-3000.uks1.devtunnels.ms)
+  // VS Code tunnels rewrite the browser's Origin to the local address (and
+  // put the tunnel host in x-forwarded-host), so the origin Next checks is
+  // localhost itself.
+  `localhost:${process.env.PORT ?? 3000}`,
+  "localhost",
+  "**.ngrok-free.app",
+  "**.ngrok.app",
+  "**.trycloudflare.com",
+  "**.loca.lt",
 ];
 
 const nextConfig: NextConfig = {
