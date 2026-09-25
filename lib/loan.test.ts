@@ -23,7 +23,14 @@ describe("loanAmountError", () => {
   it("rejects missing, too small and too large amounts", () => {
     expect(loanAmountError(null)).toMatch(/valid amount/);
     expect(loanAmountError(LOAN_MIN_MINOR - 1)).toMatch(/smallest/);
-    expect(loanAmountError(LOAN_MAX_MINOR + 1)).toMatch(/largest/);
+    expect(loanAmountError(LOAN_MAX_MINOR + 1)).toBe(
+      "The most you can borrow is ₦500,000",
+    );
+  });
+
+  it("respects a higher limit when one applies", () => {
+    expect(loanAmountError(1_000_000_00, 2_000_000_00)).toBeNull();
+    expect(loanAmountError(2_000_000_01, 2_000_000_00)).toMatch(/₦2,000,000/);
   });
 });
 

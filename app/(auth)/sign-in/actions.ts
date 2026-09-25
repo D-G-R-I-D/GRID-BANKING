@@ -15,8 +15,11 @@ export async function signInAction(
     return { fieldErrors: firstFieldErrors(parsed.error) };
   }
 
-  const userId = await authenticate(parsed.data.email, parsed.data.password);
-  if (!userId) return { error: "Email or password is incorrect" };
+  const userId = await authenticate(
+    parsed.data.identifier,
+    parsed.data.password,
+  );
+  if (!userId) return { error: "Those details don't match an account" };
 
   await startSession(userId);
   redirect("/dashboard");

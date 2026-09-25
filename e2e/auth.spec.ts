@@ -4,10 +4,11 @@ const PIN = "4826";
 
 async function signUp(page: Page, tag: string) {
   const unique = Date.now().toString().slice(-9);
+  const phone = `08${unique}`;
   await page.goto("/sign-up");
   await page.getByLabel("Full name").fill(`${tag} Person`);
   await page.getByLabel("Email").fill(`${tag}-${unique}@grid.bank`);
-  await page.getByLabel("Phone number").fill(`08${unique}`);
+  await page.getByLabel("Phone number").fill(phone);
   await page.getByLabel("Password").fill("a-strong-passphrase");
   await page.getByRole("button", { name: "Create account" }).click();
 
@@ -17,6 +18,8 @@ async function signUp(page: Page, tag: string) {
   await page.getByLabel("Confirm PIN").fill(PIN);
   await page.getByRole("button", { name: "Create PIN" }).click();
   await expect(page).toHaveURL(/\/dashboard$/);
+  // Account number = the phone number without its leading 0.
+  return { accountNumber: phone.slice(1) };
 }
 
 test("a new person signs up, sets a PIN and lands on their dashboard", async ({
@@ -118,6 +121,35 @@ test("buy airtime with the PIN and get a receipt", async ({ page }) => {
 
   await expect(page).toHaveURL(/\/transfer\/receipt\//);
   await expect(page.getByText("MTN airtime · 0803 123 4567")).toBeVisible();
+});
+
+test("sign in with the account number instead of the email", async ({
+  page,
+}) => {
+  const { accountNumber } = await signUp(page, "acct");
+  await page.goto("/settings");
+  await page.getByRole("button", { name: "Sign out" }).click();
+  await expect(page).toHaveURL(/\/sign-in$/);
+
+  await page.getByLabel("Email or account number").fill(accountNumber);
+  await page.getByLabel("Password").fill("a-strong-passphrase");
+  await page.getByRole("button", { name: "Sign in" }).click();
+  await expect(page).toHaveURL(/\/dashboard$/);
+});
+
+test("adding BVN and NIN raises the loan limit", async ({ page }) => {
+  await signUp(page, "kyc");
+  const n = Date.now().toString().slice(-9);
+  await page.goto("/settings/identity");
+  await page.getByLabel("BVN").fill(`22${n}`);
+  await page.getByLabel("NIN").fill(`33${n}`);
+  await page.getByLabel("Transaction PIN").fill(PIN);
+  await page.getByRole("button", { name: "Save" }).click();
+
+  await expect(page).toHaveURL(/\/settings$/);
+  await expect(page.getByText("BVN & NIN")).toBeVisible();
+  await page.goto("/loans/apply");
+  await expect(page.getByText("From ₦5,000 to ₦2,000,000.00")).toBeVisible();
 });
 
 test("protected routes redirect anonymous visitors", async ({ page }) => {

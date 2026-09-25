@@ -8,13 +8,18 @@ import { LoanCard } from "@/components/loan-card";
 import { CashflowCard } from "@/components/cashflow-card";
 import { ActivityFeed } from "@/components/activity-feed";
 import { AnnouncementCard } from "@/components/announcement-card";
+import { IdentityPrompt } from "@/components/identity-prompt";
+import { getIdentity } from "@/lib/services/identity-service";
 
 export default async function DashboardPage() {
   const user = await requireUser();
-  const view = await getDashboard(user.id, {
-    name: user.name,
-    accountNumber: user.accountNumber,
-  });
+  const [view, identity] = await Promise.all([
+    getDashboard(user.id, {
+      name: user.name,
+      accountNumber: user.accountNumber,
+    }),
+    getIdentity(user.id),
+  ]);
 
   return (
     <div className="flex flex-col gap-6">
@@ -55,6 +60,8 @@ export default async function DashboardPage() {
         </div>
         <ActivityFeed items={view.recentActivity} />
       </section>
+
+      <IdentityPrompt due={identity.promptDue} />
     </div>
   );
 }

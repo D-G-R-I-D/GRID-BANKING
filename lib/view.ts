@@ -132,3 +132,12 @@ export interface IncomingView {
   amountMinor: number;
   from: string;
 }
+
+export interface IdentityView {
+  bvnLast4: string | null;
+  ninLast4: string | null;
+  complete: boolean;
+  loanLimitMinor: number;
+  /** Show the dashboard nudge: not complete and not snoozed. */
+  promptDue: boolean;
+}

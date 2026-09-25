@@ -4,8 +4,12 @@
  * recomputes everything and never trusts the client's numbers).
  */
 
+import { groupThousands } from "./money";
+
 export const LOAN_MIN_MINOR = 5_000_00; // ₦5,000
 export const LOAN_MAX_MINOR = 500_000_00; // ₦500,000
+/** With both BVN and NIN added (lib/identity.ts). */
+export const LOAN_MAX_VERIFIED_MINOR = 2_000_000_00; // ₦2,000,000
 export const LOAN_TERMS = [1, 3, 6, 12] as const;
 export type LoanTerm = (typeof LOAN_TERMS)[number];
 
@@ -38,12 +42,17 @@ export function isLoanTerm(n: number): n is LoanTerm {
 }
 
 /** Why an amount can't be borrowed, or null if it's fine. */
-export function loanAmountError(principalMinor: number | null): string | null {
+export function loanAmountError(
+  principalMinor: number | null,
+  maxMinor: number = LOAN_MAX_MINOR,
+): string | null {
   if (principalMinor === null || principalMinor <= 0) {
     return "Enter a valid amount, e.g. 50000";
   }
   if (principalMinor < LOAN_MIN_MINOR) return "The smallest loan is ₦5,000";
-  if (principalMinor > LOAN_MAX_MINOR) return "The largest loan is ₦500,000";
+  if (principalMinor > maxMinor) {
+    return `The most you can borrow is ₦${groupThousands(maxMinor / 100)}`;
+  }
   return null;
 }
 

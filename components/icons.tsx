@@ -174,3 +174,19 @@ export const Phone = (p: IconProps) => (
     <path d="M11 18h2" />
   </Icon>
 );
+
+export const Share = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M12 3v12" />
+    <path d="m7 8 5-5 5 5" />
+    <path d="M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6" />
+  </Icon>
+);
+
+export const Download = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M12 3v12" />
+    <path d="m7 10 5 5 5-5" />
+    <path d="M5 21h14" />
+  </Icon>
+);

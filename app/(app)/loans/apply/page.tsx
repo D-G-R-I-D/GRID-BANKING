@@ -2,12 +2,14 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { requireUserWithPin } from "@/lib/session";
 import { getLoanSnapshot } from "@/lib/services/loan-service";
+import { getIdentity } from "@/lib/services/identity-service";
 import { LoanApplicationForm } from "./loan-application-form";
 
 export default async function ApplyForLoanPage() {
   const user = await requireUserWithPin();
   // One loan at a time.
   if (await getLoanSnapshot(user.id)) redirect("/loans");
+  const identity = await getIdentity(user.id);
 
   return (
     <div className="flex flex-col gap-5">
@@ -20,7 +22,11 @@ export default async function ApplyForLoanPage() {
           Paid into your Flow account the moment you confirm.
         </p>
       </div>
-      <LoanApplicationForm pinLength={user.pinLength} />
+      <LoanApplicationForm
+        pinLength={user.pinLength}
+        maxMinor={identity.loanLimitMinor}
+        canRaiseLimit={!identity.complete}
+      />
     </div>
   );
 }

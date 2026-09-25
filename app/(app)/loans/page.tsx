@@ -1,18 +1,22 @@
 import Link from "next/link";
 import { requireUserWithPin } from "@/lib/session";
 import { getLoans } from "@/lib/services/loan-service";
+import { getIdentity } from "@/lib/services/identity-service";
 import { Coins } from "@/components/icons";
 import { LoanSchedule } from "@/components/loan-schedule";
 import { MoneyAmount } from "@/components/money-amount";
 import { formatDay } from "@/lib/date";
-import { LOAN_MAX_MINOR, LOAN_MIN_MINOR, MONTHLY_RATE_BPS } from "@/lib/loan";
+import { LOAN_MIN_MINOR, MONTHLY_RATE_BPS } from "@/lib/loan";
 import { formatMoney } from "@/lib/money";
 import type { LoanView } from "@/lib/view";
 import { RepayForm } from "./repay-form";
 
 export default async function LoansPage() {
   const user = await requireUserWithPin();
-  const { active, past, flowBalanceMinor } = await getLoans(user.id);
+  const [{ active, past, flowBalanceMinor }, identity] = await Promise.all([
+    getLoans(user.id),
+    getIdentity(user.id),
+  ]);
 
   return (
     <div className="flex flex-col gap-6">
@@ -47,7 +51,7 @@ export default async function LoansPage() {
           </section>
         </>
       ) : (
-        <NoLoan />
+        <NoLoan maxMinor={identity.loanLimitMinor} />
       )}
 
       {past.length > 0 && (
@@ -142,7 +146,7 @@ function ActiveLoanSummary({ loan }: { loan: LoanView }) {
   );
 }
 
-function NoLoan() {
+function NoLoan({ maxMinor }: { maxMinor: number }) {
   return (
     <div className="flex flex-col items-center gap-4 rounded-lg border border-line bg-surface px-6 py-8 text-center">
       <span className="grid h-12 w-12 place-items-center rounded-full bg-accent-soft text-accent">
@@ -151,8 +155,8 @@ function NoLoan() {
       <div>
         <p className="text-sm font-medium text-ink">No active loan</p>
         <p className="mt-1 text-sm text-ink-soft">
-          Borrow {formatMoney(LOAN_MIN_MINOR)} to {formatMoney(LOAN_MAX_MINOR)}{" "}
-          at {MONTHLY_RATE_BPS / 100}% a month, flat. Paid into Flow instantly.
+          Borrow {formatMoney(LOAN_MIN_MINOR)} to {formatMoney(maxMinor)} at{" "}
+          {MONTHLY_RATE_BPS / 100}% a month, flat. Paid into Flow instantly.
         </p>
       </div>
       <Link
