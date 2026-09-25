@@ -28,6 +28,11 @@ const demoOrigins = [
   "10.*.*.*",
   "172.*.*.*", // incl. phone hotspots (172.20.10.x)
   "**.devtunnels.ms", // VS Code "Forward a Port" (abc-3000.uks1.devtunnels.ms)
+  // VS Code tunnels rewrite the browser's Origin to the local address (and
+  // put the tunnel host in x-forwarded-host), so the origin Next checks is
+  // localhost itself.
+  `localhost:${process.env.PORT ?? 3000}`,
+  "localhost",
   "**.ngrok-free.app",
   "**.ngrok.app",
   "**.trycloudflare.com",
