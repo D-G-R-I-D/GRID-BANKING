@@ -16,8 +16,29 @@ const securityHeaders = [
   },
 ];
 
+// Demoing from a phone or a tunnel link during `next dev`. Next blocks its dev
+// assets and Server Actions (sign-in, transfers…) from unknown origins, which
+// shows up as dead buttons and failed sign-ins. Allow private networks and
+// common tunnel domains — in development only; production keeps the strict
+// same-origin check.
+const isDev = process.env.NODE_ENV !== "production";
+const demoOrigins = [
+  "192.168.*.*", // home / office Wi-Fi
+  "10.*.*.*",
+  "172.*.*.*", // incl. phone hotspots (172.20.10.x)
+  "*.devtunnels.ms", // VS Code "Forward a Port"
+  "*.ngrok-free.app",
+  "*.ngrok.app",
+  "*.trycloudflare.com",
+  "*.loca.lt",
+];
+
 const nextConfig: NextConfig = {
   reactStrictMode: true,
+  ...(isDev && {
+    allowedDevOrigins: demoOrigins,
+    experimental: { serverActions: { allowedOrigins: demoOrigins } },
+  }),
   poweredByHeader: false,
   async headers() {
     return [
