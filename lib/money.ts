@@ -14,10 +14,23 @@ export function formatMoney(
       `formatMoney expects integer minor units, got ${minorUnits}`,
     );
   }
+  if (currency === DEFAULT_CURRENCY) {
+    // By hand, not Intl: browsers disagree on en-NG ("₦1,000.00" vs
+    // "NGN 1,000.00"), and a server/browser mismatch breaks hydration.
+    const abs = Math.abs(minorUnits);
+    const naira = groupThousands(Math.floor(abs / 100));
+    const kobo = String(abs % 100).padStart(2, "0");
+    return `${minorUnits < 0 ? "-" : ""}₦${naira}.${kobo}`;
+  }
   return new Intl.NumberFormat("en-NG", {
     style: "currency",
     currency,
   }).format(minorUnits / 100);
+}
+
+/** 1234567 -> "1,234,567" (same output in every runtime). */
+export function groupThousands(n: number): string {
+  return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
 
 /**

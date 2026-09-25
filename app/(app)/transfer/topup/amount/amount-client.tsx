@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { formatMoney } from "@/lib/money";
+import { formatMoney, groupThousands } from "@/lib/money";
 import {
   AIRTIME_MIN_NAIRA,
   airtimeAmountError,
@@ -92,7 +92,7 @@ export function AmountClient({
               onClick={() => setAmount(String(n))}
               className="flex-1 rounded-md border border-line bg-surface px-2 py-2 text-xs text-ink-soft transition-colors hover:bg-surface-sunk hover:text-ink"
             >
-              ₦{n.toLocaleString()}
+              ₦{groupThousands(n)}
             </button>
           ))}
         </div>

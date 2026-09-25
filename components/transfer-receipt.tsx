@@ -6,6 +6,8 @@ import { Check, Copy, Receipt } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { MoneyAmount } from "@/components/money-amount";
 import type { ReceiptView } from "@/lib/view";
+import { formatDateTime } from "@/lib/date";
+import { formatMoney } from "@/lib/money";
 
 function copyToClipboard(text: string): Promise<void> {
   if (navigator.clipboard?.writeText)
@@ -25,10 +27,7 @@ function copyToClipboard(text: string): Promise<void> {
 export function TransferReceipt({ receipt }: { receipt: ReceiptView }) {
   const [copied, setCopied] = useState(false);
 
-  const when = receipt.at.toLocaleString("en-NG", {
-    dateStyle: "medium",
-    timeStyle: "short",
-  });
+  const when = formatDateTime(receipt.at);
 
   const rows: { label: string; value: string }[] = [
     { label: "Reference", value: receipt.reference },
@@ -46,9 +45,7 @@ export function TransferReceipt({ receipt }: { receipt: ReceiptView }) {
     const text = [
       "GRID transfer receipt",
       ...rows.map((r) => `${r.label}: ${r.value}`),
-      `Amount: ₦${(receipt.amountMinor / 100).toLocaleString("en-NG", {
-        minimumFractionDigits: 2,
-      })}`,
+      `Amount: ${formatMoney(receipt.amountMinor, receipt.currency)}`,
     ].join("\n");
     await copyToClipboard(text);
     setCopied(true);
