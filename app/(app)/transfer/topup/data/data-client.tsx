@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { formatMoney } from "@/lib/money";
+import { formatMoney, groupThousands } from "@/lib/money";
 import { TopUpHeader } from "@/components/topup-header";
 import { NetworkBadge } from "@/components/network-badge";
 import { Eye, EyeOff } from "@/components/icons";
@@ -95,7 +95,7 @@ export function DataClient({
             className="flex items-center justify-between rounded-md border border-line bg-surface px-3 py-2.5 text-left text-sm text-ink"
           >
             {selectedPlan ? (
-              `${selectedPlan.data} — ₦${selectedPlan.priceNaira.toLocaleString()} (${selectedPlan.validity})`
+              `${selectedPlan.data} — ₦${groupThousands(selectedPlan.priceNaira)} (${selectedPlan.validity})`
             ) : (
               <span className="text-ink-faint">Select data bundle</span>
             )}

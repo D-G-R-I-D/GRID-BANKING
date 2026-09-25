@@ -6,6 +6,7 @@ import { formatMoney } from "@/lib/money";
 import { copyText } from "@/lib/clipboard";
 import { useToast } from "@/components/toast";
 import { Wordmark } from "@/components/logo";
+import { lagosHour } from "@/lib/date";
 
 interface BalanceCardProps {
   balanceMinor: number;
@@ -15,7 +16,7 @@ interface BalanceCardProps {
 }
 
 function greeting(): string {
-  const h = new Date().getHours();
+  const h = lagosHour();
   if (h < 12) return "Good morning";
   if (h < 17) return "Good afternoon";
   return "Good evening";

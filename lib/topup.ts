@@ -4,6 +4,7 @@
  * itself (never from the URL or the form).
  */
 import { DATA_PLANS, NETWORKS, type DataPlan } from "./topup-data";
+import { groupThousands } from "./money";
 
 export type TopUpKind = "airtime" | "data";
 export type Network = (typeof NETWORKS)[number];
@@ -45,7 +46,7 @@ export function airtimeAmountError(naira: number | null): string | null {
   if (naira < AIRTIME_MIN_NAIRA)
     return `Minimum amount is ₦${AIRTIME_MIN_NAIRA}`;
   if (naira > AIRTIME_MAX_NAIRA) {
-    return `Maximum amount is ₦${AIRTIME_MAX_NAIRA.toLocaleString("en-NG")}`;
+    return `Maximum amount is ₦${groupThousands(AIRTIME_MAX_NAIRA)}`;
   }
   return null;
 }

@@ -9,6 +9,7 @@ import {
 } from "@/components/icons";
 import { MoneyAmount } from "@/components/money-amount";
 import type { ActivityView } from "@/lib/view";
+import { dayGroupLabel, formatTime } from "@/lib/date";
 
 type IconType = ComponentType<{ size?: number }>;
 
@@ -26,15 +27,6 @@ function iconFor(item: ActivityView): IconType {
   }
 }
 
-function groupLabel(date: Date): string {
-  const today = new Date();
-  const yesterday = new Date(today);
-  yesterday.setDate(today.getDate() - 1);
-  if (date.toDateString() === today.toDateString()) return "Today";
-  if (date.toDateString() === yesterday.toDateString()) return "Yesterday";
-  return date.toLocaleDateString("en-NG", { month: "long", day: "numeric" });
-}
-
 export function ActivityFeed({ items }: { items: ActivityView[] }) {
   if (items.length === 0) {
     return (
@@ -46,7 +38,7 @@ export function ActivityFeed({ items }: { items: ActivityView[] }) {
 
   const groups = new Map<string, ActivityView[]>();
   for (const item of items) {
-    const key = groupLabel(item.at);
+    const key = dayGroupLabel(item.at);
     groups.set(key, [...(groups.get(key) ?? []), item]);
   }
 
@@ -77,10 +69,7 @@ export function ActivityFeed({ items }: { items: ActivityView[] }) {
                       </p>
                       <p className="truncate text-xs text-ink-faint">
                         {item.note ?? (incoming ? "Received" : "Sent")} ·{" "}
-                        {item.at.toLocaleTimeString("en-NG", {
-                          hour: "numeric",
-                          minute: "2-digit",
-                        })}
+                        {formatTime(item.at)}
                       </p>
                     </div>
                     <MoneyAmount

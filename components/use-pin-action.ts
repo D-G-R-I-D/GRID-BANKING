@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useMemo, useState } from "react";
+import { newIdempotencyKey } from "@/lib/id";
 
 /**
  * State for a compose → confirm-with-PIN form. Wraps useActionState and
@@ -28,7 +29,7 @@ export function usePinAction<S extends object>(
     { state: initial, submission: 0 },
   );
   const [confirming, setConfirming] = useState(false);
-  const idempotencyKey = useMemo(() => crypto.randomUUID(), []);
+  const idempotencyKey = useMemo(() => newIdempotencyKey(), []);
 
   return {
     state: counted.state,

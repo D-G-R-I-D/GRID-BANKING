@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { TopUpHeader } from "@/components/topup-header";
 import { plansForNetwork } from "@/lib/topup";
+import { groupThousands } from "@/lib/money";
 
 const FILTERS = ["All", "Daily", "Weekly", "Monthly"] as const;
 
@@ -66,7 +67,7 @@ export default function BundlePickerPage() {
               <p className="text-xs text-ink-faint">{p.validity}</p>
             </div>
             <span className="text-sm font-semibold text-ink">
-              ₦{p.priceNaira.toLocaleString()}
+              ₦{groupThousands(p.priceNaira)}
             </span>
           </button>
         ))}
