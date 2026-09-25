@@ -5,6 +5,7 @@ import { Check, Copy, Eye, EyeOff } from "@/components/icons";
 import { formatMoney } from "@/lib/money";
 import { copyText } from "@/lib/clipboard";
 import { useToast } from "@/components/toast";
+import { Wordmark } from "@/components/logo";
 
 interface BalanceCardProps {
   balanceMinor: number;
@@ -64,9 +65,7 @@ export function BalanceCard({
         <p className="text-sm text-white/60">
           {greeting()}, {firstName}
         </p>
-        <span className="font-serif text-sm tracking-tight text-white/80">
-          GRID
-        </span>
+        <Wordmark className="text-sm text-white/80" />
       </div>
 
       {/* chip */}

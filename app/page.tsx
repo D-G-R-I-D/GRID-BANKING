@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Logo, Wordmark } from "@/components/logo";
 import { Button } from "@/components/ui/button";
 
 const promises = [
@@ -31,7 +32,7 @@ export default function LandingPage() {
 
       <div className="mx-auto flex min-h-dvh w-full max-w-3xl flex-col px-6">
         <header className="flex h-16 items-center justify-between">
-          <span className="font-serif text-lg tracking-tight">GRID</span>
+          <Logo className="text-lg" />
           <Link
             href="/sign-in"
             className="text-sm text-ink-soft hover:text-ink"
@@ -46,7 +47,8 @@ export default function LandingPage() {
               A clearer bank for people who take tomorrow seriously.
             </h1>
             <p className="mt-5 max-w-md text-ink-soft">
-              GRID shows its working — so a good today adds up to a good future.
+              GRID • PAY shows its working — so a good today adds up to a good
+              future.
             </p>
             <div className="mt-8">
               <Link href="/sign-up">
@@ -68,7 +70,7 @@ export default function LandingPage() {
                 <span className="text-[0.7rem] uppercase tracking-widest text-white/50">
                   Balance
                 </span>
-                <span className="font-serif text-sm text-white/80">GRID</span>
+                <Wordmark className="text-sm text-white/80" />
               </div>
               <div className="mt-3 h-6 w-9 rounded bg-gradient-to-br from-[#d8c48a] to-[#a98f4d]" />
               <p className="tnum mt-3 text-2xl">₦ 184,200.00</p>
@@ -89,7 +91,7 @@ export default function LandingPage() {
         </main>
 
         <footer className="border-t border-line py-6 text-xs text-ink-faint">
-          GRID is a student project, not a licensed financial service.
+          GRID • PAY is a student project, not a licensed financial service.
         </footer>
       </div>
     </div>

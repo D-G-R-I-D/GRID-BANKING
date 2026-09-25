@@ -13,7 +13,7 @@ const mono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "GRID Banking",
+  title: "GRID • PAY",
   description: "A clearer bank. Good today, good tomorrow, good future.",
 };
 

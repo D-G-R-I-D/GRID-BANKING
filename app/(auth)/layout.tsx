@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Logo } from "@/components/logo";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/session";
 
@@ -13,11 +14,8 @@ export default async function AuthLayout({
 
   return (
     <main className="mx-auto flex min-h-dvh w-full max-w-sm flex-col justify-center px-6 py-16">
-      <Link
-        href="/"
-        className="mb-8 font-serif text-xl tracking-tight text-ink"
-      >
-        GRID
+      <Link href="/" className="mb-8 self-start text-xl text-ink">
+        <Logo size={28} />
       </Link>
       {children}
     </main>
